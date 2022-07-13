@@ -35,7 +35,7 @@ _The work described here was supported in part by the Defense Advanced Research_
 _Projects Agency (DoD), ARPA Order No. 3803, monitored by the Naval Electronic_
 _System Command under Contract No. N00039-81-K-0251_
 
-<br><br>
+<br>
 
 <p style="text-align:left;">
     Corner Stiching
@@ -78,3 +78,15 @@ inexpensive updates: small changes to the database can result in large amounts
 of recomputation. Corner stiching's combination of powerful operations and easy
 updates means that powerful tools previously only in "batch" mode can now be
 embedded in interactive systems.
+
+### 2. A Simplified Model of VLSI Layouts
+
+A VLSI layout normally is specified as a hierarchical collection of cells, where
+each cell contains geometrical shapes on several mask layers and pointer to
+subcells. As a convenience in presenting the data structure and algorithms, a
+simplified model will be used in this paper. Only a single mask layer will be
+considered, and hierarchy will not be considered. For this paper, I define a
+"circuit" to be a collection of rectangles. There is a single design rule in the
+model: rectangles may not overlap. The simplified model makes it easier to
+present the datastructure and algorithms. Section 8 discusses how the simplified
+model might be generalized to handle real VLSI layouts.
