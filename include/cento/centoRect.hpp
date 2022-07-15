@@ -8,6 +8,7 @@
 #pragma once
 
 #include "centoNamespace.hpp"
+#include "centoMacros.hpp"
 #include "centoPoint.hpp"
 
 #include <compare>
@@ -21,6 +22,11 @@ struct Rect
 
     friend std::strong_ordering operator<=>(const Rect& lhs, const Rect& rhs) = default;
 };
+
+CENTO_FORCEINLINE bool contains(const Rect& rect, const Point& point)
+{
+    return (rect.ll <= point) && (rect.ur >= point);
+}
 
 CENTO_END_NAMESPACE
 

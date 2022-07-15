@@ -25,18 +25,18 @@ constexpr const u64 Space = u64(-1);
  * A tile is the basic unit used for representing both space and
  * solid area in a plane.  It has the following structure:
  *
- *                                             RT
+ *                                    above
  *                                      ^
  *                                      |
- *              +-----------------------+ ---> TR
- *              |                       |
+ *              +-----------------------+ ---> right
+ *              |         (upper right) |
  *              |                       |
  *              |                       |
  *              | (lower left)          |
- *      BL <--- +-----------------------+
+ *   right <--- +-----------------------+
  *              |
  *              v
- *              LB
+ *            below
  *
  * The (x, y) coordinates of the lower left corner of the tile are stored,
  * along with four "corner stitches": RT, TR, BL, LB.
