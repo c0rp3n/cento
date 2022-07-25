@@ -16,7 +16,8 @@ CENTO_BEGIN_NAMESPACE
 
 struct ZPlane
 {
-    std::vector<ZTile> tiles;
+    std::vector<ZTile>  tiles;
+    std::vector<ZTile&> freeTiles;
 };
 
 CENTO_END_NAMESPACE

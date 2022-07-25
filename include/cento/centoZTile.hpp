@@ -46,13 +46,13 @@ struct CompressedRect
     CompressedSize w;
     CompressedSize h;
 
-    CENTO_FORCEINLINE friend Point lowerLeft(CompressedRect& r)
+    CENTO_FORCEINLINE friend Point lowerLeft(const CompressedRect& r)
     {
         return { .x = r.w == CompressedSize::InvInfinity ? r.point.x : minx,
                  .y = r.h == CompressedSize::InvInfinity ? r.point.y : miny };
     }
 
-    CENTO_FORCEINLINE friend Point upperRight(CompressedRect& r)
+    CENTO_FORCEINLINE friend Point upperRight(const CompressedRect& r)
     {
         const auto f = [](i32 coord, CompressedSize size, i32 min, i32 max)
         {
