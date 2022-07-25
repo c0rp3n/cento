@@ -93,6 +93,14 @@ static_assert(sizeof(CompressedRect) == 12);
  * The (x, y) coordinates of the lower left corner and the width and height of
  * the tile are stored, along with four "corner stitches": RT, TR, BL, LB.
  *
+ * To reduce the size of the corner stiches from 1 word each convert them to
+ * indexs and store all 4 stiches in 2 words.  This limits us to 4,294,967,295
+ * tiles but this is likely plenty for most use cases.
+ *
+ * The membership is also represnted as a index again this allows for plenty of
+ * objects to be inserted, there is also going to be more tiles in the structure
+ * than members.
+ *
  * Space tiles are distinguished by a MemberIndex equal to Space.
  *
  * When a rectangle is inserted that has a width or height > max(u16) - 1 the
