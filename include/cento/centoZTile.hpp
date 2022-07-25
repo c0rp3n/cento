@@ -24,7 +24,8 @@ enum struct TileIndex   : u32 { None  = -1 };
 enum struct CompressedSize : u16
 {
     InvInfinity = -1,
-    Infinity    = -2
+    Infinity    = -2,
+    MaxSize     = -3
 };
 
 /*
@@ -35,10 +36,53 @@ enum struct CompressedSize : u16
  * It is also able to store the boundary tiles (minx,miny),(maxy,maxy) in a
  * single tile by having a concept of inverted infinity.
  *
+ * The maximum width or height of a none standard tile is MaxSize (65533) after
+ * this a tile must be inserted as two or more adjacent solid tiles.
+ *
  * When the compressed size is Infinity the upper right coord is maxx or maxy.
  *
  * When the compressed size is a Inverted Infinity the point stored in the rect
  * is actually the upper right coord rather than the lower left.
+ *
+ * Given the below tiling:
+ *
+ * +------------------------------------------------------------------------+
+ * |                                                            (maxx,maxy) |
+ * |                                                                        |
+ * | (minx,1024)                                                            |
+ * 5---------------+----------------------------------------+---------------+
+ * |  (-1024,1024) |                            (1024,1024) |   (maxx,1024) |
+ * |               |                                        |               |
+ * |               |                                        |               |
+ * |               |                                        |               |
+ * |               |                                        |               |
+ * |               |                                        |               |
+ * | (minx,-1024)  | (-1024,-1024)                          | (1024,-1024)  |
+ * 2---------------3----------------------------------------4---------------+
+ * |                                                           (maxx,-1024) |
+ * |                                                                        |
+ * | (minx,miny)                                                            |
+ * 1------------------------------------------------------------------------+
+ *
+ * The rects would look like:
+ *
+ * 1. {.ll = {.x =  minx, .y =  miny}, .ur = {.x =  maxx, .y = -1024}}
+ * 2. {.ll = {.x =  minx, .y = -1024}, .ur = {.x = -1024, .y =  1024}}
+ * 3. {.ll = {.x = -1024, .y = -1024}, .ur = {.x =  1024, .y =  1024}}
+ * 4. {.ll = {.x =  1024, .y = -1024}, .ur = {.x =  maxx, .y =  1024}}
+ * 5. {.ll = {.x =  minx, .y =  1024}, .ur = {.x =  maxx, .y =  maxy}}
+ *
+ * The compressed rects would look like:
+ *
+ * 1. {.point = {.x =  minx, .y = -1024}, .w =    Infinity, .h = InvInfinity}
+ * 2. {.point = {.x = -1024, .y = -1024}, .w = InvInfinity, .h =        2048}
+ * 3. {.point = {.x = -1024, .y = -1024}, .w =        2048, .h =        2048}
+ * 4. {.point = {.x =  1024, .y = -1024}, .w =    Infinity, .h =        2048}
+ * 5. {.point = {.x =  minx, .y =  1024}, .w =    Infinity, .h =    Infinity}
+ *
+ * This demonstrates how the compressed rectangle can still keep the tile count
+ * to a minimum, there are unlikely to be large gaps in the middle of the
+ * tiling, so this optimisation comes in useful around the edges.
  */
 struct CompressedRect
 {
