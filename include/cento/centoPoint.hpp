@@ -14,6 +14,11 @@
 
 CENTO_BEGIN_NAMESPACE
 
+constexpr i32 minx = std::numeric_limits<i32>::min();
+constexpr i32 maxx = std::numeric_limits<i32>::max();
+constexpr i32 miny = std::numeric_limits<i32>::min();
+constexpr i32 maxy = std::numeric_limits<i32>::max();
+
 struct Point
 {
     i32 x;
