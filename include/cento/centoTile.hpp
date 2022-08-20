@@ -54,6 +54,16 @@ struct Tile
     Stitch right;
 
     friend std::strong_ordering operator<=>(const Tile& lhs, const Tile& rhs) = default;
+
+    CENTO_FORCEINLINE friend Rect rect(const Tile* tile)
+    {
+        return tile->rect;
+    }
+
+    CENTO_FORCEINLINE friend void setRect(Tile* tile, const Rect& r)
+    {
+        tile->rect = r;
+    }
 };
 static_assert(std::is_trivial_v<Tile>);
 

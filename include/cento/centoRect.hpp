@@ -21,6 +21,16 @@ struct Rect
     Point ur;
 
     friend std::strong_ordering operator<=>(const Rect& lhs, const Rect& rhs) = default;
+
+    CENTO_FORCEINLINE friend Point lowerLeft(const Rect& r)
+    {
+        return r.ll;
+    }
+
+    CENTO_FORCEINLINE friend Point upperRight(const Rect& r)
+    {
+        return r.ur;
+    }
 };
 
 CENTO_FORCEINLINE bool contains(const Rect& rect, const Point& point)
