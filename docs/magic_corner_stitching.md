@@ -135,7 +135,7 @@ working out from the object in a spiral fashion. Furthermore, bin structures do
 not indicate which areas of the chip are empty; empty areas must be
 reconstructed by scanning the bins. The need to constantly scan the bins to
 recreate information makes bin structures clumsy at best, and inefficient at
-worst, espcially for operations such as compaction and streching.
+worst, especially for operations such as compaction and stretching.
 
 A third class of data structures is based on neighbour pointers. In this
 technique, each rectangle contains pointers to rectangles that are adjacent to
@@ -143,6 +143,15 @@ it in x and y. See Figure 2. Neighnour pointers are a popular data structure for
 compaction programs such as Cabbage \[2\], since they provide information about
 relationship between objects. For example, a simple graph traversal can be used
 to determine the minimum feasible width of a cell.
+
+<p align="center">
+    Place Holder<br>
+    <strong>
+        Figure 2. Neighbour pointers can be used to indicate horizontal and
+        vertical adjacency. However, if D is moved right, it is hard to update
+        the vertical pointers without scanning the entire database.
+    </strong>
+</p>
 
 Neighbour pointers have two drawbacks. First, modifications to the structure
 generally require all the pointers to be recomputed. For example, if an object
@@ -153,3 +162,80 @@ provide much assistance in locating empty space for routing, since only the
 occupied space is represented explicitly. For these two reasons, neighbor
 pointers do not appear to be well-suited to interactive systems or that that
 provide routing aids.
+
+<p align="center">
+    Place Holder<br>
+    <strong>
+        Figure 3. An example of tiles in a corner stitched data structure. Solid
+        tile are represented with dark lines, space tiles with dotted lines. The
+        entire area of the circuit is covered with tiles. Space tiles are made
+        as wide as possible.
+    </strong>
+</p>
+
+### 4. Corner Stitching
+
+Corner stitching arose from a consideration of the weakness of the above
+mechanisms, and has two features that distinguish it from them. The first
+important feature is that all space, both empty and occupied, is represented
+explicitly in the database. The second feature is a novel way of linking
+together the objects at their corners. These _corner stitches_ permit easy
+modification of the database, and lead to efficient implementations for a
+variety of operations.
+
+Figure 3 shows four objects represented in the corner stitching scheme. The
+picture resembles the mosaic with rectangular tiles of two types, space and
+solid. Tiles contain there lower and left edges, but not their upper or right
+edges, so every point in the plane is present in exactly one tile. The tiles
+must be rectangles with sides parallel to the axes.
+
+The space tiles are organised as a _maximal horizontal strips_. This means that
+no space tile has other space tiles immediately to its right or left. When
+modifying the database, adjacent space tiles that are horizontally adjacent must
+be split into shorter tiles and then joined into maximal strips, as shows in
+Figure 4. After making sure that space tiles are as wide as possible,
+vertically adjacent tiles can be merged together if they have the same
+horizontal span. The representation of space in of no consequence to the VLSI
+layout or to the designer, and will not even be visible in real systems.
+However, the maximal horizontal strip representation is crucial to the space and
+time efficiency of the tools, as we shall see in Sections 5 and 6. Among its
+other properties, the horizontal strip representation is unique: there is one
+and only one decomposition of space for each arrangement of solid tiles.
+
+<p align="center">
+    Place Holder<br>
+    <strong>
+        Figure 4. No space tile may have another space tile to its immediate
+        right or left. In this example, tiles A and B in (a) must be split into
+        the shorter tiles of (b), then merged together into wide strips in (c),
+        and finally meged vertically in (d).
+    </strong>
+</p>
+
+Tiles are linked by a set of pointers at their corners, called _corner_
+_stitches_. Each tile contains eight, two at each corner, as illustrated in
+Figure 5. By linking together all adjacent tiles, corner stitches provide
+something equivalent to neighbour pointers.
+
+<p align="center">
+    Place Holder<br>
+    <strong>
+        Figure 5. Each tile is connected to its neighbour by eight pointers
+        called corner stitches. The name of each stitch indicates the location
+        of the stitch (lb means left bottom corner), and the second letter
+        indicates the direction in which the stitch points. Thus lb refers to
+        the pointer at the left edge of the tile pointing out its bottom.
+    </strong>
+</p>
+
+The tile/stitch representation has several attractive features, which will be
+illustrated in the sections that follow. First, the mechanism combines both
+horizontal and vertical information in a single structure. The space tiles
+provide a form of registration between the horizontal and vertical information
+and make it easy to keep all the pointers up to date as the circuit is modified.
+Because the space tiles may vary in size (as oposed to fixed-sizee bins), the
+structure adapts naturally to variations in the size of the solid tiles. The
+maximal horizontal strip representation of space results in clean upper bounds
+on the number of space tiles and also on the complexity of the algorithms. All
+tiles have the same number of pointers to other tiles, which simplifies the
+database management.
