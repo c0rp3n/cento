@@ -1,0 +1,3 @@
+[submodule "thirdparty/ut"]
+	path = thirdparty/ut
+	url = https://github.com/boost-ext/ut.git
