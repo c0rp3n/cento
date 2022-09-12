@@ -239,3 +239,65 @@ maximal horizontal strip representation of space results in clean upper bounds
 on the number of space tiles and also on the complexity of the algorithms. All
 tiles have the same number of pointers to other tiles, which simplifies the
 database management.
+
+### 5. Algorithms
+
+This section presents algorithms for manipulating the tiles and corner stitches.
+The algorithms are presented in simplified form here; a few of them are
+described in more detail in the appendices. The most important attribute of all
+the algorithms is their locality: each algorithm depends only on information in
+the immediate vicinity of the operation. None of the algorithms has an average
+running time any worse than linear in the number of tiles in the affected area.
+One can devise pathological cases where the algorithms require time linear in
+the overall layout size, but in practice (particularly for VLSI layouts, which
+tend to be densely packed) their running times will be small and nearly
+independent if the size of the layout.
+
+In discussing the performance of the algorithms, the corner stitches provide a
+good unit of measure. The complexity of the algorithms will be discussed in
+terms of the number of stitches that must be traversed (or, altered natively,
+the number of tiles that must be visited) and/or the number of stitches that
+must be modified.
+
+#### 5.1. Point Finding
+
+Several different kinds of searching are facilitated by corner stitching. One
+of the most common operations is to find the tile given (x,y) location. Figure 6
+illustrates how this can be done with corner stitching. The algorithm iterates
+in x and y, starting from any given tile in the database.
+
+<p align="center">
+    Place Holder<br>
+    <strong>
+        Figure 6. To locate the tile containing a given point, alternate between
+        up/down and left/right motions.
+    </strong>
+</p>
+
+1. First move up or down along the left edges of tiles (following lt and lb
+stitches) until a tile is found whose vertical range contains the desired point.
+
+2. Then move left or right along the bottom edges of tiles (following br and bl
+stitches) until a tile is found whose horizontal range contains the desired
+point.
+
+3. Since the horizontal motion may have caused a vertical misalignment, steps 1
+and 2 may have to be iterated several times to locate the tile containing the
+point.
+
+In the worst case, this algorithm may require every tile in the entire structure
+to be searched (this happens, for example, if all the tiles in the structure are
+in a single column or row). Fortunately, the average case behaviour is much
+better than this. If there are a total of N space or solid tiles and they are of
+relatively uniform size, then on the order of √N tiles will be passed through in
+the average case. For a layout containing a million tiles (which is typical of
+the fully expanded mask sets of current VLSI circuits) this means a few thousand
+tiles will have to be touched.
+
+In interactive systems, there is a simple way to reduce the time spent in
+searches of this sort: keep around a pointer to any tile in the approximate area
+where the designer is working. When a large design is being edited, the
+designer's attention is generally focussed on a small piece of the design (e.g.
+a piece that can be viewed comfortably on a graphic device). If a tile in this
+area is remembered for reference, then search time depends only on how much is
+on the screen, not how large the design is.
