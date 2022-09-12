@@ -57,14 +57,54 @@ struct Tile
 
     friend std::strong_ordering operator<=>(const Tile& lhs, const Tile& rhs) = default;
 
-    CENTO_FORCEINLINE friend Rect rect(const Tile* tile)
+    CENTO_FORCEINLINE friend Rect getRect(const Tile* tile)
     {
         return tile->rect;
+    }
+
+    CENTO_FORCEINLINE friend i32 getLeft(const Tile* tile)
+    {
+        return tile->rect.ll.x;
+    }
+
+    CENTO_FORCEINLINE friend i32 getBottom(const Tile* tile)
+    {
+        return tile->rect.ll.y;
+    }
+
+    CENTO_FORCEINLINE friend i32 getRight(const Tile* tile)
+    {
+        return tile->rect.ur.x;
+    }
+
+    CENTO_FORCEINLINE friend i32 getTop(const Tile* tile)
+    {
+        return tile->rect.ur.y;
     }
 
     CENTO_FORCEINLINE friend void setRect(Tile* tile, const Rect& r)
     {
         tile->rect = r;
+    }
+
+    CENTO_FORCEINLINE friend Stitch& leftBottom(Tile* tile)
+    {
+        return tile->left;
+    }
+
+    CENTO_FORCEINLINE friend Stitch& bottomLeft(Tile* tile)
+    {
+        return tile->below;
+    }
+
+    CENTO_FORCEINLINE friend Stitch& topRight(Tile* tile)
+    {
+        return tile->right;
+    }
+
+    CENTO_FORCEINLINE friend Stitch& rightTop(Tile* tile)
+    {
+        return tile->above;
     }
 };
 static_assert(std::is_trivial_v<Tile>);
