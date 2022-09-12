@@ -34,10 +34,12 @@ struct Rect
         return r.ur;
     }
 };
+static_assert(std::is_trivial_v<Rect>);
 
 CENTO_FORCEINLINE bool contains(const Rect& rect, const Point& point)
 {
-    return (rect.ll <= point) && (rect.ur >= point);
+    return (point.x >= rect.ll.x) && (point.y >= rect.ll.y) &&
+           (point.x <= rect.ur.x) && (point.y <= rect.ur.y);
 }
 
 CENTO_END_NAMESPACE

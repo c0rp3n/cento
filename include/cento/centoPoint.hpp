@@ -28,6 +28,7 @@ struct Point
 
     friend std::strong_ordering operator<=>(const Point& lhs, const Point& rhs) = default;
 };
+static_assert(std::is_trivial_v<Point>);
 
 CENTO_END_NAMESPACE
 

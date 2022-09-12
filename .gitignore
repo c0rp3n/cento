@@ -1,6 +1,9 @@
 # Prerequisites
 *.d
 
+# Build
+[Bb]uild/
+
 # Compiled Object files
 *.slo
 *.lo

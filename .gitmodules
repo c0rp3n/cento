@@ -1,3 +1,6 @@
 [submodule "thirdparty/ut"]
 	path = thirdparty/ut
 	url = https://github.com/boost-ext/ut.git
+[submodule "thirdparty/moneta"]
+	path = thirdparty/moneta
+	url = git@github.com:c0rp3n/moneta.git

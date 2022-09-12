@@ -25,23 +25,20 @@ else()
 endif()
 
 add_library(cento_lib INTERFACE)
-target_include_directories
-(
+target_include_directories(
     cento_lib
         INTERFACE
             $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
             $<INSTALL_INTERFACE:include>
 )
 
-write_basic_package_version_file
-(
+write_basic_package_version_file(
     "${PROJECT_BINARY_DIR}/centoConfigVersion.cmake"
     COMPATIBILITY SameMinorVersion
 )
 
-install
-(
-    TARGETS cento
+install(
+    TARGETS cento_lib
     EXPORT centoTargets
         LIBRARY DESTINATION lib COMPONENT Runtime
         ARCHIVE DESTINATION lib COMPONENT Development
@@ -62,3 +59,17 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 
 add_library(Cento::cento ALIAS cento_lib)
 
+include(CTest)
+add_executable(cento_test
+    test/main.cpp
+    test/find.cpp
+    test/point.cpp
+    test/rect.cpp)
+set_target_properties(cento_test PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+target_include_directories(cento_test
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/include"
+        "${PROJECT_SOURCE_DIR}/thirdparty/moneta/include"
+        "${PROJECT_SOURCE_DIR}/thirdparty/ut/include")
+target_link_libraries(cento_test PRIVATE Cento::cento)
+add_test(NAME CentoTest COMMAND cento_test)

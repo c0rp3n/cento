@@ -11,16 +11,39 @@
 
 #include "centoNamespace.hpp"
 #include "centoTile.hpp"
+#include "centoTilePlan.hpp"
 
 #include <mnta/mnta.hpp>
+#include <limits>
 
 CENTO_BEGIN_NAMESPACE
+
+constexpr const i32 pInfinity = std::numeric_limits<i32>::max();
+constexpr const i32 nInfinity = std::numeric_limits<i32>::min();
 
 struct Plane
 {
     Tile*                      start;
     mnta::RecyclingArena<Tile> allocator;
 };
+
+CENTO_FORCEINLINE Tile* createTile(Plane& plane, const TilePlan& plan)
+{
+    Tile* const t = plane.allocator.get();
+    *t = Tile{.rect = plan.rect, .id = plan.id};
+
+    return t;
+}
+
+CENTO_FORCEINLINE Tile* createUniverse(Plane& plane)
+{
+    const Rect r{.ll = {.x = nInfinity, .y = nInfinity},
+                 .ur = {.x = pInfinity, .y = pInfinity}};
+
+    plane.start = createTile(plane, {.id = Space, .rect = r});
+
+    return plane.start;
+}
 
 CENTO_END_NAMESPACE
 
