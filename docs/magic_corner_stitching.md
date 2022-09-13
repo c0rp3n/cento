@@ -18,16 +18,17 @@
     <strong>Abstract</strong><br>
 </p>
 
-Corner stiching is a technique for representing rectangular two-dimensional
+Corner stitching is a technique for representing rectangular two-dimensional
 objects. It appears to be especially well suited for interactive editing
 systems for VLSI layouts. The data structure has two important features: first,
-empty space is represented explicitly; and second, rectangular areas are stiched
-together at their corner like a patchwork quilt. This organization results in
-fast algorithms (linear time or better) for searching, creation, deletion,
-stretching, and compaction. The algorithms are represented under a simplified
-model of VLSI circuits, and the storage requirements of the structure are
-discussed. Measurements indicate that corner stiching requires approximately
-three times as much memory space as the simplest possible representation.
+empty space is represented explicitly; and second, rectangular areas are
+stitched together at their corner like a patchwork quilt. This organization
+results in fast algorithms (linear time or better) for searching, creation,
+deletion, stretching, and compaction. The algorithms are represented under a
+simplified model of VLSI circuits, and the storage requirements of the structure
+are discussed. Measurements indicate that corner stitching requires
+approximately three times as much memory space as the simplest possible
+representation.
 
 <br>
 
