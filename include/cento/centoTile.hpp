@@ -87,12 +87,12 @@ struct Tile
         tile->rect = r;
     }
 
-    CENTO_FORCEINLINE friend Stitch& leftBottom(Tile* tile)
+    CENTO_FORCEINLINE friend Stitch& bottomLeft(Tile* tile)
     {
         return tile->left;
     }
 
-    CENTO_FORCEINLINE friend Stitch& bottomLeft(Tile* tile)
+    CENTO_FORCEINLINE friend Stitch& leftBottom(Tile* tile)
     {
         return tile->below;
     }
