@@ -59,6 +59,16 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 
 add_library(Cento::cento ALIAS cento_lib)
 
+add_executable(cento_parse
+    src/main.cpp)
+set_target_properties(cento_parse PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+target_include_directories(cento_parse
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/include"
+        "${PROJECT_SOURCE_DIR}/thirdparty/moneta/include"
+        "${PROJECT_SOURCE_DIR}/thirdparty/ut/include")
+target_link_libraries(cento_parse PRIVATE Cento::cento)
+
 include(CTest)
 add_executable(cento_test
     test/main.cpp
