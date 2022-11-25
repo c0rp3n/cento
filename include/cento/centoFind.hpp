@@ -12,8 +12,6 @@
 #include "centoNamespace.hpp"
 #include "centoPlane.hpp"
 
-#include <mnta/mnta.hpp>
-
 CENTO_BEGIN_NAMESPACE
 
 CENTO_FORCEINLINE Tile* findTileAt(const Plane& plane, const Point& point)
