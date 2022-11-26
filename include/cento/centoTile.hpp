@@ -109,7 +109,17 @@ struct Tile
         return tile->left;
     }
 
+    CENTO_FORCEINLINE friend const Stitch& bottomLeft(const Tile* tile)
+    {
+        return tile->left;
+    }
+
     CENTO_FORCEINLINE friend Stitch& leftBottom(Tile* tile)
+    {
+        return tile->below;
+    }
+
+    CENTO_FORCEINLINE friend const Stitch& leftBottom(const Tile* tile)
     {
         return tile->below;
     }
@@ -119,7 +129,17 @@ struct Tile
         return tile->right;
     }
 
+    CENTO_FORCEINLINE friend const Stitch& topRight(const Tile* tile)
+    {
+        return tile->right;
+    }
+
     CENTO_FORCEINLINE friend Stitch& rightTop(Tile* tile)
+    {
+        return tile->above;
+    }
+
+    CENTO_FORCEINLINE friend const Stitch& rightTop(const Tile* tile)
     {
         return tile->above;
     }

@@ -15,9 +15,10 @@
 
 CENTO_BEGIN_NAMESPACE
 
-CENTO_FORCEINLINE Tile* findTileAt(const Plane& plane, const Point& point)
+CENTO_FORCEINLINE Tile* findTileAt(Tile*        start,
+                                   const Point& point)
 {
-    Tile* t = plane.start;
+    Tile* t = start;
 
     while (not contains(getRect(t), point))
     {
@@ -37,6 +38,11 @@ CENTO_FORCEINLINE Tile* findTileAt(const Plane& plane, const Point& point)
     }
 
     return t;
+}
+
+CENTO_FORCEINLINE Tile* findTileAt(const Plane& plane, const Point& point)
+{
+    return findTileAt(plane.hint ? plane.hint : plane.start, point);
 }
 
 CENTO_END_NAMESPACE
