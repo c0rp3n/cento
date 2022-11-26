@@ -11,6 +11,7 @@
 
 #include "centoNamespace.hpp"
 #include "centoDefs.hpp"
+#include "centoMacros.hpp"
 
 #include <compare>
 

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "centoNamespace.hpp"
+#include "centoMacros.hpp"
 #include "centoZTile.hpp"
 
 #include <vector>

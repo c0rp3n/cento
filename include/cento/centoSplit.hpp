@@ -10,6 +10,7 @@
 #pragma once
 
 #include "centoNamespace.hpp"
+#include "centoMacros.hpp"
 #include "centoPlane.hpp"
 
 CENTO_BEGIN_NAMESPACE

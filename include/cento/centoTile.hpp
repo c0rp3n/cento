@@ -10,10 +10,12 @@
 #pragma once
 
 #include "centoNamespace.hpp"
+#include "centoMacros.hpp"
 #include "centoRect.hpp"
 
 #include <compare>
 #include <typeinfo>
+#include <type_traits>
 
 CENTO_BEGIN_NAMESPACE
 
@@ -80,6 +82,21 @@ struct Tile
     CENTO_FORCEINLINE friend i32 getTop(const Tile* tile)
     {
         return tile->rect.ur.y;
+    }
+
+    CENTO_FORCEINLINE friend bool isSolid(const Tile* tile)
+    {
+        return tile->id != Space;
+    }
+
+    CENTO_FORCEINLINE friend bool isSpace(const Tile* tile)
+    {
+        return tile->id == Space;
+    }
+
+    CENTO_FORCEINLINE friend void setBody(Tile* tile, const u64 id)
+    {
+        tile->id = id;
     }
 
     CENTO_FORCEINLINE friend void setRect(Tile* tile, const Rect& r)

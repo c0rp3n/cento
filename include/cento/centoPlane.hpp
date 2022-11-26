@@ -10,6 +10,7 @@
 #pragma once
 
 #include "centoNamespace.hpp"
+#include "centoMacros.hpp"
 #include "centoTile.hpp"
 #include "centoTilePlan.hpp"
 
@@ -23,7 +24,8 @@ constexpr const i32 nInfinity = std::numeric_limits<i32>::min();
 
 struct Plane
 {
-    Tile*                      start;
+    Tile*                      start = nullptr;
+    Tile*                      hint  = nullptr;
     mnta::RecyclingArena<Tile> allocator;
 };
 

@@ -140,7 +140,7 @@ static_assert(sizeof(CompressedRect) == 12);
  * the tile are stored, along with four "corner stitches": RT, TR, BL, LB.
  *
  * To reduce the size of the corner stiches from 1 word each convert them to
- * indexs and store all 4 stiches in 2 words.  This limits us to 4,294,967,295
+ * indices and store all 4 stiches in 2 words.  This limits us to 4,294,967,295
  * tiles but this is likely plenty for most use cases.
  *
  * The membership is also represnted as a index again this allows for plenty of
