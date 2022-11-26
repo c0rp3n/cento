@@ -72,10 +72,12 @@ target_link_libraries(cento_parse PRIVATE Cento::cento)
 include(CTest)
 add_executable(cento_test
     test/main.cpp
+    test/explore.cpp
     test/find.cpp
     test/point.cpp
     test/rect.cpp
-    test/split.cpp)
+    test/split.cpp
+    test/tile.cpp)
 set_target_properties(cento_test PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 target_include_directories(cento_test
     PRIVATE

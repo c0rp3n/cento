@@ -59,6 +59,10 @@ struct Tile
 
     friend std::strong_ordering operator<=>(const Tile& lhs, const Tile& rhs) = default;
 
+    ////////////////////////////////////////////////////////////////////////////
+    // Rectangle
+    ////////////////////////////////////////////////////////////////////////////
+
     CENTO_FORCEINLINE friend Rect getRect(const Tile* tile)
     {
         return tile->rect;
@@ -84,6 +88,15 @@ struct Tile
         return tile->rect.ur.y;
     }
 
+    CENTO_FORCEINLINE friend void setRect(Tile* tile, const Rect& r)
+    {
+        tile->rect = r;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Body
+    ////////////////////////////////////////////////////////////////////////////
+
     CENTO_FORCEINLINE friend bool isSolid(const Tile* tile)
     {
         return tile->id != Space;
@@ -99,17 +112,16 @@ struct Tile
         tile->id = id;
     }
 
-    CENTO_FORCEINLINE friend void setRect(Tile* tile, const Rect& r)
-    {
-        tile->rect = r;
-    }
+    ////////////////////////////////////////////////////////////////////////////
+    // Stitches
+    ////////////////////////////////////////////////////////////////////////////
 
     CENTO_FORCEINLINE friend Stitch& bottomLeft(Tile* tile)
     {
         return tile->left;
     }
 
-    CENTO_FORCEINLINE friend const Stitch& bottomLeft(const Tile* tile)
+    CENTO_FORCEINLINE friend Stitch bottomLeft(const Tile* tile)
     {
         return tile->left;
     }
@@ -119,7 +131,7 @@ struct Tile
         return tile->below;
     }
 
-    CENTO_FORCEINLINE friend const Stitch& leftBottom(const Tile* tile)
+    CENTO_FORCEINLINE friend Stitch leftBottom(const Tile* tile)
     {
         return tile->below;
     }
@@ -129,7 +141,7 @@ struct Tile
         return tile->right;
     }
 
-    CENTO_FORCEINLINE friend const Stitch& topRight(const Tile* tile)
+    CENTO_FORCEINLINE friend Stitch topRight(const Tile* tile)
     {
         return tile->right;
     }
@@ -139,9 +151,49 @@ struct Tile
         return tile->above;
     }
 
-    CENTO_FORCEINLINE friend const Stitch& rightTop(const Tile* tile)
+    CENTO_FORCEINLINE friend Stitch rightTop(const Tile* tile)
     {
         return tile->above;
+    }
+
+    CENTO_FORCEINLINE friend Stitch leftTop(const Tile* tile)
+    {
+        const i32 x = getLeft(tile);
+
+        Tile* above = topRight(tile);
+        while(above && getRight(above) > x) { above = leftBottom(above); }
+
+        return above;
+    }
+
+    CENTO_FORCEINLINE friend Stitch topLeft(const Tile* tile)
+    {
+        const i32 y = getTop(tile);
+
+        Tile* left = leftBottom(tile);
+        while(left && getBottom(left) < y) { left = topRight(left); }
+
+        return left;
+    }
+
+    CENTO_FORCEINLINE friend Stitch rightBottom(const Tile* tile)
+    {
+        const i32 x = getRight(tile);
+
+        Tile* bottom = bottomLeft(tile);
+        while(bottom && getLeft(bottom) < x) { bottom = rightTop(bottom); }
+
+        return bottom;
+    }
+
+    CENTO_FORCEINLINE friend Stitch bottomRight(const Tile* tile)
+    {
+        const i32 y = getBottom(tile);
+
+        Tile* right = rightTop(tile);
+        while(right && getTop(right) < y) { right = bottomLeft(right); }
+
+        return right;
     }
 };
 static_assert(std::is_trivial_v<Tile>);
