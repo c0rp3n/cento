@@ -23,7 +23,6 @@ suite empty = []()
                                   .ur = {.x = 512, .y = 512}};
 
         // the universe should be empty
-        //expect(cento::empty(plane, area));
-        (void) area;
+        expect(cento::empty(plane, area));
     };
 };

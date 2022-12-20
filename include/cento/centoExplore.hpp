@@ -28,7 +28,7 @@ CENTO_FORCEINLINE void rightTiles(const Tile* tile, auto callback)
     //    of the starting tile).
     while (callback(next))
     {
-        next = bottomLeft(next);
+        next = leftBottom(next);
         if (getTop(next) < y) { break; }
     }
 }
@@ -37,7 +37,7 @@ CENTO_FORCEINLINE void leftTiles(const Tile* tile, auto callback)
 {
     const i32 y = getTop(tile);
 
-    const Tile* next = leftBottom(tile);
+    const Tile* next = bottomLeft(tile);
     while (callback(next))
     {
         next = topRight(next);
@@ -64,8 +64,11 @@ CENTO_FORCEINLINE bool empty(const Plane& plane, const Rect& r)
         //    either by invoking the point-finding algorithm, or by traversing
         //    the lt stitch upwards and then traversing the br stitches right
         //    until the desired tile is found.
-        const Tile* const right = rightTop(tile);
-        if (isSolid(right) || (getRight(right) < r.ur.x)) { return false; }
+        if (getRight(tile) < r.ur.x)
+        {
+            const Tile* const right = rightTop(tile);
+            if (isSolid(right) || (getRight(right) < r.ur.x)) { return false; }
+        }
 
         y    = getTop(tile);
         tile = findTileAt(plane, {r.ll.x, y});
