@@ -24,5 +24,6 @@ suite empty = []()
 
         // the universe should be empty
         //expect(cento::empty(plane, area));
+        (void) area;
     };
 };

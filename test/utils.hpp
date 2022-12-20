@@ -12,6 +12,7 @@
 #include "cento/centoTilePlan.hpp"
 #include "cento/centoPlane.hpp"
 
+#include <iostream>
 #include <vector>
 
 using TilingPlan = std::vector<cento::TilePlan>;
@@ -84,5 +85,32 @@ inline TileVec createTiles(cento::Plane& plane, const TilingPlan& plan)
 
     return tiles;
 }
+
+CENTO_BEGIN_NAMESPACE
+
+std::ostream& operator<<(std::ostream& to, const Point& put)
+{
+    return to << '{' << put.x << ',' << put.y << '}';
+}
+
+std::ostream& operator<<(std::ostream& to, const Rect& put)
+{
+    return to << '{' << put.ll << ',' << put.ur << '}';
+}
+
+std::ostream& operator<<(std::ostream& to, const Tile* put)
+{
+    if (put == nullptr) { return to << "nullptr"; }
+
+    to << '{' << put->id << ',' << put->rect << ',';
+    to << '[' << static_cast<void*>(put->below);
+    to << ',' << static_cast<void*>(put->left);
+    to << ',' << static_cast<void*>(put->above);
+    to << ',' << static_cast<void*>(put->right) << "]}";
+
+    return to;
+}
+
+CENTO_END_NAMESPACE
 
 #endif // utils_hpp

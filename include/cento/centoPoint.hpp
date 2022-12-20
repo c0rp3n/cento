@@ -14,6 +14,7 @@
 #include "centoMacros.hpp"
 
 #include <compare>
+#include <limits>
 
 CENTO_BEGIN_NAMESPACE
 

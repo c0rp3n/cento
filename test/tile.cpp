@@ -29,8 +29,10 @@ suite create_tiles = []()
          */
         const TilingPlan plan =
         {
-            {.rect = {.ll = {.x = -256, .y = -256}, .ur = {.x = 0, .y = 256}}},
-            {.rect = {.ll = {.x = 0, .y = -256}, .ur = {.x = 256, .y = 256}}},
+            {.id   = 0,
+             .rect = {.ll = {.x = -256, .y = -256}, .ur = {.x = 0, .y = 256}}},
+            {.id   = 1,
+             .rect = {.ll = {.x = 0, .y = -256}, .ur = {.x = 256, .y = 256}}}
         };
         const TileVec tiles = createTiles(plane, plan);
 
@@ -91,23 +93,32 @@ suite tile_stitches = []()
         const TilingPlan plan =
         {
             // center
-            {.rect = {.ll = {.x = -256, .y = -256}, .ur = {.x = 256, .y = 256}}},
+            {.id   = 0,
+             .rect = {.ll = {.x = -256, .y = -256}, .ur = {.x = 256, .y = 256}}},
             // bl
-            {.rect = {.ll = {.x = min, .y = -256}, .ur = {.x = -256, .y = 0}}},
+            {.id   = 1,
+             .rect = {.ll = {.x = min, .y = -256}, .ur = {.x = -256, .y = 0}}},
             // tl
-            {.rect = {.ll = {.x = min, .y = 0}, .ur = {.x = -256, .y = 256}}},
+            {.id   = 2,
+             .rect = {.ll = {.x = min, .y = 0}, .ur = {.x = -256, .y = 256}}},
             // rb
-            {.rect = {.ll = {.x = 256, .y = -256}, .ur = {.x = max, .y = 0}}},
+            {.id   = 3,
+             .rect = {.ll = {.x = 256, .y = -256}, .ur = {.x = max, .y = 0}}},
             // rt
-            {.rect = {.ll = {.x = 256, .y = 0}, .ur = {.x = max, .y = 256}}},
+            {.id   = 4,
+             .rect = {.ll = {.x = 256, .y = 0}, .ur = {.x = max, .y = 256}}},
             // tl
-            {.rect = {.ll = {.x = min, .y = 256}, .ur = {.x = 0, .y = max}}},
+            {.id   = 5,
+             .rect = {.ll = {.x = min, .y = 256}, .ur = {.x = 0, .y = max}}},
             // tr
-            {.rect = {.ll = {.x = 0, .y = 256}, .ur = {.x = max, .y = max}}},
+            {.id   = 6,
+             .rect = {.ll = {.x = 0, .y = 256}, .ur = {.x = max, .y = max}}},
             // bl
-            {.rect = {.ll = {.x = min, .y = min}, .ur = {.x = 0, .y = -256}}},
+            {.id   = 7,
+             .rect = {.ll = {.x = min, .y = min}, .ur = {.x = 0, .y = -256}}},
             // br
-            {.rect = {.ll = {.x = 0, .y = min}, .ur = {.x = max, .y = -256}}},
+            {.id   = 8,
+             .rect = {.ll = {.x = 0, .y = min}, .ur = {.x = max, .y = -256}}},
         };
         const TileVec tiles = createTiles(plane, plan);
 

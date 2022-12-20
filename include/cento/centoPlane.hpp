@@ -32,7 +32,12 @@ struct Plane
 CENTO_FORCEINLINE Tile* createTile(Plane& plane, const TilePlan& plan)
 {
     Tile* const t = plane.allocator.get();
-    *t = Tile{.rect = plan.rect, .id = plan.id};
+    *t = Tile{.rect = plan.rect,
+              .id = plan.id,
+              .below = nullptr,
+              .left = nullptr,
+              .above = nullptr,
+              .right = nullptr};
 
     return t;
 }

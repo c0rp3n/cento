@@ -156,12 +156,19 @@ struct Tile
         return tile->above;
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    // Dynamic Stitches
+    //
+    // These stitches could be stored in the Tile however to save memory we do
+    // not store these in the tile and instead recreate them.
+    ////////////////////////////////////////////////////////////////////////////
+
     CENTO_FORCEINLINE friend Stitch leftTop(const Tile* tile)
     {
         const i32 x = getLeft(tile);
 
-        Tile* above = topRight(tile);
-        while(above && getRight(above) > x) { above = leftBottom(above); }
+        Tile* above = rightTop(tile);
+        while(above && getLeft(above) > x) { above = bottomLeft(above); }
 
         return above;
     }
@@ -170,8 +177,8 @@ struct Tile
     {
         const i32 y = getTop(tile);
 
-        Tile* left = leftBottom(tile);
-        while(left && getBottom(left) < y) { left = topRight(left); }
+        Tile* left = bottomLeft(tile);
+        while(left && getTop(left) < y) { left = rightTop(left); }
 
         return left;
     }
@@ -180,8 +187,8 @@ struct Tile
     {
         const i32 x = getRight(tile);
 
-        Tile* bottom = bottomLeft(tile);
-        while(bottom && getLeft(bottom) < x) { bottom = rightTop(bottom); }
+        Tile* bottom = leftBottom(tile);
+        while(bottom && getRight(bottom) < x) { bottom = topRight(bottom); }
 
         return bottom;
     }
@@ -190,8 +197,8 @@ struct Tile
     {
         const i32 y = getBottom(tile);
 
-        Tile* right = rightTop(tile);
-        while(right && getTop(right) < y) { right = bottomLeft(right); }
+        Tile* right = topRight(tile);
+        while(right && getBottom(right) > y) { right = leftBottom(right); }
 
         return right;
     }

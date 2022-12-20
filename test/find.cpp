@@ -49,16 +49,20 @@ suite find = []()
         constexpr const i32 min = cento::nInfinity;
         constexpr const i32 max = cento::pInfinity;
 
-        const cento::TilePlan tlp{.rect = {.ll = {.x = min, .y = 0},
+        const cento::TilePlan tlp{.id   = 0,
+                                  .rect = {.ll = {.x = min, .y = 0},
                                            .ur = {.x = 0, .y = max}}};
 
-        const cento::TilePlan trp{.rect = {.ll = {.x = 0, .y = 0},
+        const cento::TilePlan trp{.id   = 1,
+                                  .rect = {.ll = {.x = 0, .y = 0},
                                            .ur = {.x = max, .y = max}}};
 
-        const cento::TilePlan blp{.rect = {.ll = {.x = min, .y = min},
+        const cento::TilePlan blp{.id   = 2,
+                                  .rect = {.ll = {.x = min, .y = min},
                                            .ur = {.x = 0, .y = 0}}};
 
-        const cento::TilePlan brp{.rect = {.ll = {.x = 0, .y = min},
+        const cento::TilePlan brp{.id   = 3,
+                                  .rect = {.ll = {.x = 0, .y = min},
                                            .ur = {.x = max, .y = 0}}};
 
         cento::Tile* const tl = cento::createTile(plane, tlp);

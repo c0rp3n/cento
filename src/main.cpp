@@ -7,20 +7,13 @@
 #include <array>
 #include <vector>
 
-#ifdef _WIN32
-
-#define strtok_s(BUFFER, SIZE, DEL, STATE) strtok_s(BUFFER, DEL, STATE)
-
-#endif
-
 namespace
 {
 
     std::vector<cento::Rect> read_midi(const char* filename)
     {
-        FILE*   ifile = nullptr;
-        errno_t err   = fopen_s(&ifile, filename, "r");
-        if ((ifile == nullptr) || (err != 0)) { return {}; }
+        FILE* ifile = fopen(filename, "r");
+        if (ifile == nullptr) { return {}; }
 
         std::array<char, 128> buffer;
         const char            del[] = " \t\r\n";
@@ -28,9 +21,8 @@ namespace
         std::vector<cento::Rect> rects;
         while (fgets(buffer.data(), int(buffer.size()), ifile) != nullptr)
         {
-            rsize_t strmax = 0; static_cast<void>(strmax);
-            char*   ptr    = nullptr;
-            char*   token  = strtok_s(buffer.data(), &strmax, del, &ptr);
+            char*  ptr    = nullptr;
+            char*  token  = strtok_r(buffer.data(), del, &ptr);
 
             // skip when this line is a comment
             if (token[0] == '#') { continue; }
@@ -38,7 +30,7 @@ namespace
             // read coordinates (clockwise order)
             int coor[8] = {0};
             int i       = 0;
-            for (i = 0; token != nullptr; (token = strtok_s(nullptr, &strmax, del, &ptr)), (++i))
+            for (i = 0; token != nullptr; (token = strtok_r(nullptr, del, &ptr)), (++i))
             {
                 coor[i] = atoi(token);
             }
@@ -53,6 +45,8 @@ namespace
             // collect tile
             rects.push_back({.ll = {coor[0], coor[1]}, .ur = {coor[4], coor[5]}});
         }
+
+        fclose(ifile);
 
         return rects;
     }
