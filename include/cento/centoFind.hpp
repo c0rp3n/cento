@@ -42,7 +42,9 @@ CENTO_FORCEINLINE Tile* findTileAt(Tile*        start,
 
 CENTO_FORCEINLINE Tile* findTileAt(const Plane& plane, const Point& point)
 {
-    return findTileAt(plane.hint ? plane.hint : plane.start, point);
+    plane.hint = findTileAt(plane.hint ? plane.hint : plane.start, point);
+
+    return plane.hint;
 }
 
 CENTO_END_NAMESPACE

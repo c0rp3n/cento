@@ -25,7 +25,7 @@ constexpr const i32 nInfinity = std::numeric_limits<i32>::min();
 struct Plane
 {
     Tile*                      start = nullptr;
-    Tile*                      hint  = nullptr;
+    mutable Tile*              hint  = nullptr;
     mnta::RecyclingArena<Tile> allocator;
 };
 
