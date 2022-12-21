@@ -65,6 +65,7 @@ set_target_properties(cento_parse PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIR
 target_include_directories(cento_parse
     PRIVATE
         "${PROJECT_SOURCE_DIR}/include"
+        "${PROJECT_SOURCE_DIR}/thirdparty/GSL/include"
         "${PROJECT_SOURCE_DIR}/thirdparty/moneta/include"
         "${PROJECT_SOURCE_DIR}/thirdparty/ut/include")
 target_link_libraries(cento_parse PRIVATE Cento::cento)
@@ -74,6 +75,7 @@ add_executable(cento_test
     test/main.cpp
     test/explore.cpp
     test/find.cpp
+    test/join.cpp
     test/point.cpp
     test/rect.cpp
     test/split.cpp
@@ -82,6 +84,7 @@ set_target_properties(cento_test PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRE
 target_include_directories(cento_test
     PRIVATE
         "${PROJECT_SOURCE_DIR}/include"
+        "${PROJECT_SOURCE_DIR}/thirdparty/GSL/include"
         "${PROJECT_SOURCE_DIR}/thirdparty/moneta/include"
         "${PROJECT_SOURCE_DIR}/thirdparty/ut/include")
 target_link_libraries(cento_test PRIVATE Cento::cento)

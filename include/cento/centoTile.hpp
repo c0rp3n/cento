@@ -93,6 +93,26 @@ struct Tile
         tile->rect = r;
     }
 
+    CENTO_FORCEINLINE friend void setLeft(Tile* tile, i32 x)
+    {
+        tile->rect.ll.x = x;
+    }
+
+    CENTO_FORCEINLINE friend void setBottom(Tile* tile, i32 y)
+    {
+        tile->rect.ll.y = y;
+    }
+
+    CENTO_FORCEINLINE friend void setRight(Tile* tile, i32 x)
+    {
+        tile->rect.ur.x = x;
+    }
+
+    CENTO_FORCEINLINE friend void setTop(Tile* tile, i32 y)
+    {
+        tile->rect.ur.y = y;
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     // Body
     ////////////////////////////////////////////////////////////////////////////
