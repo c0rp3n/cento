@@ -66,12 +66,12 @@ CENTO_FORCEINLINE bool empty(const Plane& plane, const Rect& r)
         //    until the desired tile is found.
         if (getRight(tile) < r.ur.x)
         {
-            const Tile* const right = rightTop(tile);
+            const Tile* const right = topRight(tile);
             if (isSolid(right) || (getRight(right) < r.ur.x)) { return false; }
         }
 
         y    = getTop(tile);
-        tile = findTileAt(plane, {r.ll.x, y});
+        tile = leftTop(tile);
 
         // 4. Repeat steps 2 and 3 until either a solid tile is found or the top
         //    of the area of interest is reached.

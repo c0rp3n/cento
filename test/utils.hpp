@@ -83,22 +83,24 @@ inline TileVec createTiles(cento::Plane& plane, const TilingPlan& plan)
         buildStitches(tile, tiles);
     }
 
+    if (not tiles.empty()) { plane.start = tiles.front(); }
+
     return tiles;
 }
 
 CENTO_BEGIN_NAMESPACE
 
-std::ostream& operator<<(std::ostream& to, const Point& put)
+inline std::ostream& operator<<(std::ostream& to, const Point& put)
 {
     return to << '{' << put.x << ',' << put.y << '}';
 }
 
-std::ostream& operator<<(std::ostream& to, const Rect& put)
+inline std::ostream& operator<<(std::ostream& to, const Rect& put)
 {
     return to << '{' << put.ll << ',' << put.ur << '}';
 }
 
-std::ostream& operator<<(std::ostream& to, const Tile* put)
+inline std::ostream& operator<<(std::ostream& to, const Tile* put)
 {
     if (put == nullptr) { return to << "nullptr"; }
 
