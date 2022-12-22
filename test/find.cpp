@@ -8,6 +8,7 @@
 #include <boost/ut.hpp>
 
 #include "cento/cento.hpp"
+#include "cento/centoCreate.hpp"
 #include "cento/centoFind.hpp"
 
 using namespace boost::ut;

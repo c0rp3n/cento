@@ -27,30 +27,17 @@ struct Plane
     Tile*                      start = nullptr;
     mutable Tile*              hint  = nullptr;
     mnta::RecyclingArena<Tile> allocator;
+
+    CENTO_FORCEINLINE friend Tile* get(Plane& plane) noexcept
+    {
+        return plane.allocator.get();
+    }
+
+    CENTO_FORCEINLINE friend void put(Plane& plane, Tile* tile) noexcept
+    {
+        plane.allocator.put(tile);
+    }
 };
-
-CENTO_FORCEINLINE Tile* createTile(Plane& plane, const TilePlan& plan)
-{
-    Tile* const t = plane.allocator.get();
-    *t = Tile{.rect = plan.rect,
-              .id = plan.id,
-              .below = nullptr,
-              .left = nullptr,
-              .above = nullptr,
-              .right = nullptr};
-
-    return t;
-}
-
-CENTO_FORCEINLINE Tile* createUniverse(Plane& plane)
-{
-    const Rect r{.ll = {.x = nInfinity, .y = nInfinity},
-                 .ur = {.x = pInfinity, .y = pInfinity}};
-
-    plane.start = createTile(plane, {.id = Space, .rect = r});
-
-    return plane.start;
-}
 
 CENTO_END_NAMESPACE
 

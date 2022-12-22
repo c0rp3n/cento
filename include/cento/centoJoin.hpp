@@ -63,7 +63,7 @@ CENTO_FORCEINLINE Tile* joinTileHorz(Plane& plane, Tile* upper, Tile* lower)
     setTop(lower, getTop(upper));
 
     if (plane.hint == upper) { plane.hint = lower; }
-    plane.allocator.put(upper);
+    put(plane, upper);
 
     return lower;
 }
@@ -119,7 +119,7 @@ CENTO_FORCEINLINE Tile* joinTileVert(Plane& plane, Tile* left, Tile* right)
     setRight(left, getRight(right));
 
     if (plane.hint == right) { plane.hint = left; }
-    plane.allocator.put(right);
+    put(plane, right);
 
     return left;
 }

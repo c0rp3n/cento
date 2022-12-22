@@ -32,7 +32,7 @@ CENTO_FORCEINLINE HorzSplit splitTileHorz(Plane& plane, Tile* tile, const i32 y)
     if (lowerLeft(r).y >= y) { return {}; }
     if (upperRight(r).y <= y) { return {}; }
 
-    Tile* const upper = plane.allocator.get();
+    Tile* const upper = get(plane);
     Tile* const lower = tile;
 
     upper->id = Space;
@@ -90,7 +90,7 @@ CENTO_FORCEINLINE VertSplit splitTileVert(Plane& plane, Tile* tile, const i32 x)
     if (upperRight(r).x <= x) { return {}; }
 
     Tile* const left  = tile;
-    Tile* const right = plane.allocator.get();
+    Tile* const right = get(plane);
 
     // update body
     right->id = Space;
