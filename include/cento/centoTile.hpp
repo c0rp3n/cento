@@ -23,6 +23,17 @@ struct Tile;
 
 using Stitch = Tile*;
 
+struct Stitches
+{
+    Stitch below;
+    Stitch left;
+    Stitch above;
+    Stitch right;
+
+    friend std::strong_ordering operator<=>(const Stitches& lhs,
+                                            const Stitches& rhs) = default;
+};
+
 constexpr const u64 Space = u64(-1);
 
 /*
@@ -57,7 +68,8 @@ struct Tile
     Stitch above;
     Stitch right;
 
-    friend std::strong_ordering operator<=>(const Tile& lhs, const Tile& rhs) = default;
+    friend std::strong_ordering operator<=>(const Tile& lhs,
+                                            const Tile& rhs) = default;
 
     ////////////////////////////////////////////////////////////////////////////
     // Rectangle
@@ -174,6 +186,11 @@ struct Tile
     CENTO_FORCEINLINE friend Stitch rightTop(const Tile* tile)
     {
         return tile->above;
+    }
+
+    CENTO_FORCEINLINE friend Stitches getStitches(const Tile* tile)
+    {
+        return {tile->below, tile->left, tile->above, tile->right};
     }
 
     ////////////////////////////////////////////////////////////////////////////
