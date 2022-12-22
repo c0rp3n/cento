@@ -77,7 +77,7 @@ suite join = []()
         expect(getRect(t) == cento::Rect{.ll = {-256, -256}, .ur = {256, 256}});
     };
 
-    "merge"_test = []()
+    "with_neighbours"_test = []()
     {
         cento::Plane plane;
 
