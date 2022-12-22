@@ -23,14 +23,19 @@ namespace detail
 {
 
     template <typename F> requires std::invocable<F&&, Tile*>
-    CENTO_FORCEINLINE void iterateTiles(const Tile* tile,
+    CENTO_FORCEINLINE void iterateTiles(Tile*       tile,
                                         F&&         userCallback,
                                         auto&&      stopCallback,
                                         auto&&      nextTile)
     {
         while (tile)
         {
-            if constexpr (std::predicate<F&&, Tile*>)
+            if constexpr (std::is_invocable_r_v<Tile*, F&&, Tile*>)
+            {
+                tile = std::invoke(std::forward<F>(userCallback), tile);
+                if (tile == nullptr) { return; }
+            }
+            else if constexpr (std::predicate<F&&, Tile*>)
             {
                 if (not std::invoke(std::forward<F>(userCallback), tile)) { return; }
             }
@@ -68,7 +73,7 @@ CENTO_FORCEINLINE void leftTiles(const Tile* tile, F&& callback)
     detail::iterateTiles(left,
                          std::forward<F>(callback),
                          [&](const Tile* t) { return getTop(t) >= y; },
-                         [](const Tile* t) { return topRight(t); });
+                         [](const Tile* t) { return rightTop(t); });
 }
 
 template <typename F> requires std::invocable<F&&, Tile*>

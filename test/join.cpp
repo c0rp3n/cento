@@ -8,6 +8,7 @@
 #include <boost/ut.hpp>
 
 #include "cento/cento.hpp"
+#include "cento/centoExplore.hpp"
 #include "cento/centoJoin.hpp"
 
 #include "utils.hpp"
@@ -185,5 +186,137 @@ suite join = []()
         expect(getStitches(right)  == Stitches{below, center, above, nullptr});
         expect(getStitches(above)  == Stitches{left, nullptr, nullptr, nullptr});
         expect(getStitches(below)  == Stitches{nullptr, nullptr, right, nullptr});
+    };
+
+    "merge_side_left"_test = []()
+    {
+        cento::Plane plane;
+
+        /*
+         * +---------+---------+---------+
+         * |         |         |         |
+         * +---------+---------+         |
+         * |         |         |         |
+         * +---------+---------+ center  |
+         * |         |         |         |
+         * +---------+---------+         |
+         * |         |         |         |
+         * +---------+---------+---------+
+         *
+         */
+
+        const TilingPlan plan =
+        {
+            // center
+            {.id   = 0,
+             .rect = {.ll = {.x = 0, .y = 0}, .ur = {.x = 200, .y = 400}}},
+            // row 1
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = -200, .y = 0}, .ur = {.x = 0, .y = 100}}},
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = -400, .y = 0}, .ur = {.x = -200, .y = 100}}},
+            // row 2
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = -200, .y = 100}, .ur = {.x = 0, .y = 200}}},
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = -400, .y = 100}, .ur = {.x = -200, .y = 200}}},
+            // row 3
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = -200, .y = 200}, .ur = {.x = 0, .y = 300}}},
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = -400, .y = 200}, .ur = {.x = -200, .y = 300}}},
+            // row 4
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = -200, .y = 300}, .ur = {.x = 0, .y = 400}}},
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = -400, .y = 300}, .ur = {.x = -200, .y = 400}}},
+        };
+        const TileVec tiles = createTiles(plane, plan);
+
+        cento::Tile* const center = tiles[0];
+
+        cento::leftTiles(center, [&](cento::Tile* t) -> cento::Tile*
+        {
+            cento::Tile* left = bottomLeft(t);
+            if (t == nullptr) { return t; }
+
+            return cento::joinTileVert(plane, left, t);
+        });
+
+        i32 count = 0;
+        cento::leftTiles(center, [&](cento::Tile* t)
+        {
+            expect(getLeft(t)  == -400);
+            expect(getRight(t) == 0);
+            ++count;
+        });
+
+        expect(count == 4_i);
+    };
+
+    "merge_side_right"_test = []()
+    {
+        cento::Plane plane;
+
+        /*
+         * +---------+---------+---------+
+         * |         |         |         |
+         * |         +---------+---------+
+         * |         |         |         |
+         * | center  +---------+---------+
+         * |         |         |         |
+         * |         +---------+---------+
+         * |         |         |         |
+         * +---------+---------+---------+
+         *
+         */
+
+        const TilingPlan plan =
+        {
+            // center
+            {.id   = 0,
+             .rect = {.ll = {.x = -200, .y = 0}, .ur = {.x = 0, .y = 400}}},
+            // row 1
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = 0, .y = 0}, .ur = {.x = 200, .y = 100}}},
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = 200, .y = 0}, .ur = {.x = 400, .y = 100}}},
+            // row 2
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = 0, .y = 100}, .ur = {.x = 200, .y = 200}}},
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = 200, .y = 100}, .ur = {.x = 400, .y = 200}}},
+            // row 3
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = 0, .y = 200}, .ur = {.x = 200, .y = 300}}},
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = 200, .y = 200}, .ur = {.x = 400, .y = 300}}},
+            // row 4
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = 0, .y = 300}, .ur = {.x = 200, .y = 400}}},
+            {.id   = cento::Space,
+             .rect = {.ll = {.x = 200, .y = 300}, .ur = {.x = 400, .y = 400}}},
+        };
+        const TileVec tiles = createTiles(plane, plan);
+
+        cento::Tile* const center = tiles[0];
+
+        cento::rightTiles(center, [&](cento::Tile* t) -> cento::Tile*
+        {
+            cento::Tile* right = topRight(t);
+            if (t == nullptr) { return t; }
+
+            return cento::joinTileVert(plane, t, right);
+        });
+
+        i32 count = 0;
+        cento::rightTiles(center, [&](cento::Tile* t)
+        {
+            expect(getLeft(t)  == 0);
+            expect(getRight(t) == 400);
+            ++count;
+        });
+
+        expect(count == 4_i);
     };
 };
