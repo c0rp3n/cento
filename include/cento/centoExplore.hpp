@@ -13,36 +13,86 @@
 #include "centoFind.hpp"
 #include "centoPlane.hpp"
 
+#include <concepts>
+#include <functional>
+#include <type_traits>
+
 CENTO_BEGIN_NAMESPACE
 
-CENTO_FORCEINLINE void rightTiles(const Tile* tile, auto callback)
+namespace detail
 {
-    const i32 y = getBottom(tile);
 
-    // 1. Follow the tr stitch of the starting tile to find its topmost right 
-    //    neighbour.
-    const Tile* next = topRight(tile);
-
-    // 2. Then trace down through lb stitches until the bottommost neighbour is
-    //    found (the bottommost neighbour is the one pointed to by the br stitch
-    //    of the starting tile).
-    while (callback(next))
+    template <typename F> requires std::invocable<F&&, Tile*>
+    CENTO_FORCEINLINE void iterateTiles(const Tile* tile,
+                                        F&&         userCallback,
+                                        auto&&      stopCallback,
+                                        auto&&      nextTile)
     {
-        next = leftBottom(next);
-        if (getTop(next) < y) { break; }
+        while (tile)
+        {
+            if constexpr (std::predicate<F&&, Tile*>)
+            {
+                if (not std::invoke(std::forward<F>(userCallback), tile)) { return; }
+            }
+            else
+            {
+                std::invoke(std::forward<F>(userCallback), tile);
+            }
+
+            if (stopCallback(tile)) { return; }
+
+            tile = nextTile(tile);
+        }
     }
+
 }
 
-CENTO_FORCEINLINE void leftTiles(const Tile* tile, auto callback)
+template <typename F> requires std::invocable<F&&, Tile*>
+CENTO_FORCEINLINE void topTiles(const Tile* tile, F&& callback)
+{
+    const i32 x = getLeft(tile);
+
+    Tile* left = rightTop(tile);
+    detail::iterateTiles(left,
+                         std::forward<F>(callback),
+                         [&](const Tile* t) { return getLeft(t) <= x; },
+                         [](const Tile* t) { return bottomLeft(t); });
+}
+
+template <typename F> requires std::invocable<F&&, Tile*>
+CENTO_FORCEINLINE void leftTiles(const Tile* tile, F&& callback)
 {
     const i32 y = getTop(tile);
 
-    const Tile* next = bottomLeft(tile);
-    while (callback(next))
-    {
-        next = topRight(next);
-        if (getBottom(next) > y) { break; }
-    }
+    Tile* left = bottomLeft(tile);
+    detail::iterateTiles(left,
+                         std::forward<F>(callback),
+                         [&](const Tile* t) { return getTop(t) >= y; },
+                         [](const Tile* t) { return topRight(t); });
+}
+
+template <typename F> requires std::invocable<F&&, Tile*>
+CENTO_FORCEINLINE void bottomTiles(const Tile* tile, F&& callback)
+{
+    const i32 x = getRight(tile);
+
+    Tile* left = leftBottom(tile);
+    detail::iterateTiles(left,
+                         std::forward<F>(callback),
+                         [&](const Tile* t) { return getRight(t) >= x; },
+                         [](const Tile* t) { return topRight(t); });
+}
+
+template <typename F> requires std::invocable<F&&, Tile*>
+CENTO_FORCEINLINE void rightTiles(const Tile* tile, F&& callback)
+{
+    const i32 y = getBottom(tile);
+
+    Tile* right = topRight(tile);
+    detail::iterateTiles(right,
+                         std::forward<F>(callback),
+                         [&](const Tile* t) { return getBottom(t) <= y; },
+                         [](const Tile* t) { return leftBottom(t); });
 }
 
 CENTO_FORCEINLINE bool empty(const Plane& plane, const Rect& r)
