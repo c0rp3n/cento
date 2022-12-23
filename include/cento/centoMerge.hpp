@@ -63,19 +63,19 @@ CENTO_FORCEINLINE Tile* mergeUp(Plane& plane, Tile* tile)
     return joinTileHorz(plane, above, tile);
 }
 
-CENTO_FORCEINLINE Tile* mergeLeft(Plane& plane, Tile* tile)
+CENTO_FORCEINLINE Tile* mergeRight(Plane& plane, Tile* tile)
 {
-    Tile* left = bottomLeft(tile);
-    if (left == nullptr) { return nullptr; }
+    Tile* right = topRight(tile);
+    if (right == nullptr) { return nullptr; }
 
     // Check whether the height of the tiles matches
-    if (not detail::canMergeVert(left, tile)) { return nullptr; }
+    if (not detail::canMergeVert(tile, right)) { return nullptr; }
 
     // Check whether the IDs of the tiles can be merged
     // This should be controlled by some customisation point in the future
-    if (not detail::canMergeIDs(left, tile)) { return nullptr; }
+    if (not detail::canMergeIDs(tile, right)) { return nullptr; }
 
-    return joinTileVert(plane, left, tile);
+    return joinTileVert(plane, tile, right);
 }
 
 CENTO_FORCEINLINE Tile* mergeDown(Plane& plane, Tile* tile)
@@ -93,19 +93,19 @@ CENTO_FORCEINLINE Tile* mergeDown(Plane& plane, Tile* tile)
     return joinTileHorz(plane, tile, below);
 }
 
-CENTO_FORCEINLINE Tile* mergeRight(Plane& plane, Tile* tile)
+CENTO_FORCEINLINE Tile* mergeLeft(Plane& plane, Tile* tile)
 {
-    Tile* right = topRight(tile);
-    if (right == nullptr) { return nullptr; }
+    Tile* left = bottomLeft(tile);
+    if (left == nullptr) { return nullptr; }
 
     // Check whether the height of the tiles matches
-    if (not detail::canMergeVert(tile, right)) { return nullptr; }
+    if (not detail::canMergeVert(left, tile)) { return nullptr; }
 
     // Check whether the IDs of the tiles can be merged
     // This should be controlled by some customisation point in the future
-    if (not detail::canMergeIDs(tile, right)) { return nullptr; }
+    if (not detail::canMergeIDs(left, tile)) { return nullptr; }
 
-    return joinTileVert(plane, tile, right);
+    return joinTileVert(plane, left, tile);
 }
 
 CENTO_END_NAMESPACE

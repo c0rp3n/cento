@@ -76,6 +76,7 @@ add_executable(cento_test
     test/explore.cpp
     test/find.cpp
     test/join.cpp
+    test/merge.cpp
     test/point.cpp
     test/rect.cpp
     test/split.cpp
