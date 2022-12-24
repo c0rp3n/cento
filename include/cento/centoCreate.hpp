@@ -13,7 +13,6 @@
 #include "centoMacros.hpp"
 #include "centoExplore.hpp"
 #include "centoPlane.hpp"
-#include "centoSplit.hpp"
 
 CENTO_BEGIN_NAMESPACE
 
