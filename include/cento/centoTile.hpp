@@ -241,6 +241,7 @@ struct Tile
     }
 };
 static_assert(std::is_trivial_v<Tile>);
+static_assert(sizeof(Tile) == 56);
 
 CENTO_END_NAMESPACE
 
