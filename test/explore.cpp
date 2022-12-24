@@ -241,3 +241,88 @@ suite neighbours = []()
         expect(count == 1_i);
     };
 };
+
+suite query = []()
+{
+    "universe"_test = []()
+    {
+        cento::Plane plane;
+        cento::createUniverse(plane);
+
+        const cento::Rect area = {.ll = {.x = -512, .y = -512},
+                                  .ur = {.x = 512, .y = 512}};
+
+        i32 count = 0;
+        cento::query(plane, area, [&](cento::Tile*) { ++count; });
+        expect(count == 1_i);
+    };
+
+    "many_splits"_test = []()
+    {
+        cento::Plane plane;
+
+        /*
+         * +--------------+--------------+ - max
+         * |              |              |
+         * |      lt      |      rt      |
+         * |              |              |
+         * +---------+----+----+---------+ - 256
+         * |    tl   |         |   tr    |
+         * +---------+ center  +---------+ - 0
+         * |    bl   |         |   br    |
+         * +---------+----+----+---------+ - -256
+         * |              |              |
+         * |      lb      |      rb      |
+         * |              |              |
+         * +--------------+--------------+ - min
+         *
+         * m         -    0    2         m
+         * i         2         5         a
+         * n         5         6         x
+         *           6
+         *
+         */
+
+        constexpr const i32 min = cento::nInfinity;
+        constexpr const i32 max = cento::pInfinity;
+
+        const TilingPlan plan =
+        {
+            // center
+            {.id   = 0,
+             .rect = {.ll = {.x = -256, .y = -256}, .ur = {.x = 256, .y = 256}}},
+            // bl
+            {.id   = 1,
+             .rect = {.ll = {.x = min, .y = -256}, .ur = {.x = -256, .y = 0}}},
+            // tl
+            {.id   = 2,
+             .rect = {.ll = {.x = min, .y = 0}, .ur = {.x = -256, .y = 256}}},
+            // rb
+            {.id   = 3,
+             .rect = {.ll = {.x = 256, .y = -256}, .ur = {.x = max, .y = 0}}},
+            // rt
+            {.id   = 4,
+             .rect = {.ll = {.x = 256, .y = 0}, .ur = {.x = max, .y = 256}}},
+            // tl
+            {.id   = 5,
+             .rect = {.ll = {.x = min, .y = 256}, .ur = {.x = 0, .y = max}}},
+            // tr
+            {.id   = 6,
+             .rect = {.ll = {.x = 0, .y = 256}, .ur = {.x = max, .y = max}}},
+            // bl
+            {.id   = 7,
+             .rect = {.ll = {.x = min, .y = min}, .ur = {.x = 0, .y = -256}}},
+            // br
+            {.id   = 8,
+             .rect = {.ll = {.x = 0, .y = min}, .ur = {.x = max, .y = -256}}},
+        };
+        createTiles(plane, plan);
+
+        const cento::Rect area = {.ll = {.x = -512, .y = -512},
+                                  .ur = {.x = 512, .y = 512}};
+
+        i32 count = 0;
+        cento::query(plane, area, [&](cento::Tile*) { ++count; });
+        expect(count == 9_i);
+    };
+};

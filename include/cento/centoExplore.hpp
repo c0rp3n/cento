@@ -135,6 +135,130 @@ CENTO_FORCEINLINE bool empty(const Plane& plane, const Rect& r)
     return true;
 }
 
+namespace detail
+{
+
+    template <typename F> requires std::invocable<F&&, Tile*>
+    bool areaEnum(Tile*       enumRT,
+                  i32         enumBottom,
+                  const Rect& rect,
+                  F&&         callback)
+    {
+        const bool atBottom = (enumBottom <= rect.ll.y);
+
+        /*
+         * Begin examination of tiles along right edge.
+         * A tile to the right of the one being enumerated is enumerable if:
+         *  - its bottom lies at or above that of the tile being enumerated, or,
+         *  - the bottom of the tile being enumerated lies at or below the
+         *    bottom of the search rectangle.
+         */
+
+        i32 srchBottom = enumBottom;
+        if (srchBottom < rect.ll.y) { srchBottom = rect.ll.y; }
+
+        Tile* tp;
+        Tile* tpLB;
+        i32   tpNextTop;
+        for (tp = enumRT, tpNextTop = getTop(tp); tpNextTop > srchBottom; tp = tpLB)
+        {
+            /*
+             * Since the client's filter function may result in this tile
+             * being deallocated or otherwise modified, we must extract
+             * all the information we will need from the tile before we
+             * apply the filter function.
+             */
+
+            tpLB      = leftBottom(tp);
+            tpNextTop = tpLB ? getTop(tpLB) : nInfinity; /* Since getTop(tpLB) comes from tp */
+
+            if ((getBottom(tp) < rect.ur.y) && (atBottom || (getBottom(tp) >= enumBottom)))
+            {
+                /*
+                 * We extract more information from the tile, which we will use
+                 * after applying the filter function.
+                 */
+
+                i32   tpRight  = getRight(tp);
+                i32   tpBottom = getBottom(tp);
+                Tile* tpTR     = topRight(tp);
+
+                if constexpr (std::predicate<F&&, Tile*>)
+                {
+                    if (not std::invoke(std::forward<F>(callback), tp)) { return true; }
+                }
+                else
+                {
+                    std::invoke(std::forward<F>(callback), tp);
+                }
+
+                /*
+                 * If the right boundary of the tile being enumerated is
+                 * inside of the search area, recursively enumerate
+                 * tiles to its right.
+                 */
+
+                if (tpRight < rect.ur.x)
+                {
+                    if (areaEnum(tpTR, tpBottom, rect, std::forward<F>(callback))) { return true; }
+                }
+            }
+        }
+
+        return false;
+    }
+
+}
+
+template <typename F> requires std::invocable<F&&, Tile*>
+CENTO_FORCEINLINE void query(const Plane& plane, const Rect& rect, F&& callback)
+{
+    cento::Point here     = {rect.ll.x, rect.ur.y - 1};
+    cento::Tile* enumTile = cento::findTileAt(plane, here);
+
+    i64 here_y = here.y;
+    while(here_y >= rect.ll.y)
+    {
+        /*
+         * Find the tile (tp) immediately below the one to be
+         * enumerated (enumTile).  This must be done before we enumerate
+         * the tile, as the filter function applied to enumerate
+         * it can result in its deallocation or modification in
+         * some other way.
+         * 
+         * We also have to be sure we do not overflow from the infinity tile
+         */
+
+        here_y          = i64(getBottom(enumTile)) - 1;
+        here.y          = i32(here_y);
+        cento::Tile* tp = cento::findTileAt(plane, here);
+
+        cento::Point enumRB = {getRight(enumTile), getBottom(enumTile)};
+        cento::Tile* enumTR = topRight(enumTile);
+
+        if constexpr (std::predicate<F&&, Tile*>)
+        {
+            if (not std::invoke(std::forward<F>(callback), enumTile)) { return; }
+        }
+        else
+        {
+            std::invoke(std::forward<F>(callback), enumTile);
+        }
+
+        /*
+         * If the right boundary of the tile being enumerated is
+         * inside of the search area, recursively enumerate
+         * tiles to its right.
+         */
+
+        if (enumRB.x < rect.ur.x)
+        {
+            if (detail::areaEnum(enumTR, enumRB.y, rect, std::forward<F>(callback))) { return; }
+        }
+        enumTile = tp;
+    }
+}
+
 CENTO_END_NAMESPACE
 
 #endif // centoExplore_hpp
