@@ -3,6 +3,9 @@
 #include <string.h>
 
 #include "cento/centoRect.hpp"
+#include "cento/centoCreate.hpp"
+#include "cento/centoInsert.hpp"
+#include "cento/centoRemove.hpp"
 
 #include <array>
 #include <vector>
@@ -63,6 +66,29 @@ int main(const int argc, const char* argv[])
     for (const cento::Rect& r : rects)
     {
         printf("(%d, %d) - (%d, %d)\n", r.ll.x, r.ll.y, r.ur.x, r.ur.y);
+    }
+
+    cento::Plane plane;
+    cento::createUniverse(plane);
+
+    u64 id = 0;
+    std::vector<cento::Tile*> tiles;
+    for (const cento::Rect& r : rects)
+    {
+        const cento::TilePlan plan{id++, r};
+        cento::Tile* const    tile = cento::insertTile(plane, plan);
+        if (tile == nullptr)
+        {
+            printf("failed to insert tile %ld (%d, %d) - (%d, %d)\n", id, r.ll.x, r.ll.y, r.ur.x, r.ur.y);
+            return -1;
+        }
+
+        tiles.push_back(tile);
+    }
+
+    for (cento::Tile* const tile : tiles)
+    {
+        cento::removeTile(plane, tile);
     }
 
     return 0;
