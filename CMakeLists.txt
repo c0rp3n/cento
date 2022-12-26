@@ -80,6 +80,7 @@ add_executable(cento_test
     test/merge.cpp
     test/point.cpp
     test/rect.cpp
+    test/remove.cpp
     test/split.cpp
     test/tile.cpp)
 set_target_properties(cento_test PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
