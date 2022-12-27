@@ -54,6 +54,12 @@ namespace
         return rects;
     }
 
+    void print_tile(const char* const message, const cento::Tile* const t)
+    {
+        const cento::Rect r = getRect(t);
+        printf("%s %lu (%d, %d) - (%d, %d)\n", message, t->id, r.ll.x, r.ll.y, r.ur.x, r.ur.y);
+    }
+
 }
 
 int main(const int argc, const char* argv[])
@@ -79,8 +85,14 @@ int main(const int argc, const char* argv[])
         cento::Tile* const    tile = cento::insertTile(plane, plan);
         if (tile == nullptr)
         {
-            printf("failed to insert tile %ld (%d, %d) - (%d, %d)\n", plan.id, r.ll.x, r.ll.y, r.ur.x, r.ur.y);
-            return -1;
+            printf("failed to insert tile %lu (%d, %d) - (%d, %d)\n", plan.id, r.ll.x, r.ll.y, r.ur.x, r.ur.y);
+            cento::query(plane, r, [](cento::Tile* t)
+            {
+                if (isSpace(t)) { return; }
+
+                print_tile("overlaps with tile", t);
+            });
+            continue;
         }
 
         tiles.push_back(tile);
@@ -88,7 +100,22 @@ int main(const int argc, const char* argv[])
 
     for (cento::Tile* const tile : tiles)
     {
+        print_tile("removing", tile);
+
         cento::removeTile(plane, tile);
+
+        cento::queryAll(plane, [](cento::Tile* t)
+        {
+            if (not isSpace(t)) { return; }
+
+            const bool left  = bottomLeft(t) ? isSolid(bottomLeft(t)) : true;
+            const bool right = topRight(t) ? isSolid(topRight(t)) : true;
+            if (left && right) { return; }
+
+            print_tile("failed to merge", t);
+            if (not left) { print_tile("with left", bottomLeft(t)); }
+            if (not right) { print_tile("with right", topRight(t)); }
+        });
     }
 
     i32 count = 0;
@@ -97,6 +124,10 @@ int main(const int argc, const char* argv[])
     if (count != 1)
     {
         printf("failed to delete tiles\n");
+        cento::queryAll(plane, [](cento::Tile* t)
+        {
+            print_tile("tile", t);
+        });
         return -1;
     }
 
