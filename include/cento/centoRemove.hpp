@@ -116,7 +116,7 @@ CENTO_FORCEINLINE void removeTile(Plane& plane, Tile* tile)
     }
 
     // 5. Check if the bottom right tile can now be merged upwards.
-    mergeUp(plane, rb);
+    if (isSolid(bottomLeft(rightTop(rb)))) { mergeUp(plane, rb); }
 
     // 6. If the lower left tile is lower than the bottom of the deleted tile
     //    we should split them so they share a common bottom edge.
@@ -132,14 +132,14 @@ CENTO_FORCEINLINE void removeTile(Plane& plane, Tile* tile)
     auto lSplit = [&](Tile* t)
     {
         Tile* right = topRight(t);
-        if (const HorzSplit split = splitTileHorz(plane, right, getTop(t)); split)
+        if (getTop(t) < getTop(right))
         {
-            right = split.lower;
+            splitTileHorz(plane, right, getTop(t));
         }
 
         if (isSolid(t)) { return; }
 
-        for (; getBottom(t) < getBottom(right); right = leftBottom(right))
+        for (right = topRight(t); getBottom(t) < getBottom(right); right = leftBottom(right))
         {
             t = splitTileHorz(plane, t, getBottom(right)).lower;
         }
@@ -157,10 +157,10 @@ CENTO_FORCEINLINE void removeTile(Plane& plane, Tile* tile)
 
     // 9. If the left top tile is taller than the deleted tile we should split
     //    it so they share a common edge and then try and merge it.
-    if (isSpace(lt) && (getBottom(lt) > delTop))
+    if (isSpace(lt) && (getBottom(lt) < delTop))
     {
         const HorzSplit split = splitTileHorz(plane, lt, delTop);
-        mergeRight(plane, split.lower);
+        mergeRight(plane, lt);
         lt = split.upper;
     }
 
