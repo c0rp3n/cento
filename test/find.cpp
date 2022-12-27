@@ -83,9 +83,9 @@ suite find = []()
         br->above = tr;
         br->left  = bl;
 
-        plane.start = bl;
+        plane.hint = bl;
 
-        expect(cento::findTileAt(plane, {0,0})       == bl);
+        expect(cento::findTileAt(plane, {0,0})       == tr);
         expect(cento::findTileAt(plane, {-256,256})  == tl);
         expect(cento::findTileAt(plane, {256,256})   == tr);
         expect(cento::findTileAt(plane, {-256,-256}) == bl);

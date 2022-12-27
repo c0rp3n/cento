@@ -34,15 +34,15 @@ CENTO_FORCEINLINE Tile* createUniverse(Plane& plane)
     const Rect r{.ll = {.x = nInfinity, .y = nInfinity},
                  .ur = {.x = pInfinity, .y = pInfinity}};
 
-    plane.start  = get(plane);
-    *plane.start = Tile{.rect = r,
-                        .id = Space,
-                        .below = nullptr,
-                        .left = nullptr,
-                        .above = nullptr,
-                        .right = nullptr};
+    plane.hint  = get(plane);
+    *plane.hint = Tile{.rect = r,
+                       .id = Space,
+                       .below = nullptr,
+                       .left = nullptr,
+                       .above = nullptr,
+                       .right = nullptr};
 
-    return plane.start;
+    return plane.hint;
 }
 
 CENTO_END_NAMESPACE

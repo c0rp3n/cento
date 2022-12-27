@@ -127,7 +127,6 @@ CENTO_FORCEINLINE bool empty(const Plane& plane, const Rect& area)
             if (isSolid(right) || (getRight(right) < area.ur.x)) { return false; }
         }
 
-
         here_y = i64(getBottom(tile)) - 1;
         here.y = i32(here_y);
         tile   = cento::findTileAt(plane, here);

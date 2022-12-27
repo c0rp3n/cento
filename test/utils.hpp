@@ -84,7 +84,7 @@ inline TileVec createTiles(cento::Plane& plane, const TilingPlan& plan)
         buildStitches(tile, tiles);
     }
 
-    if (not tiles.empty()) { plane.start = tiles.front(); }
+    if (not tiles.empty()) { plane.hint = tiles.front(); }
 
     return tiles;
 }

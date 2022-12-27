@@ -20,21 +20,43 @@ CENTO_FORCEINLINE Tile* findTileAt(Tile*        start,
 {
     Tile* t = start;
 
-    while (not contains(getRect(t), point))
+    // 1. First move up (or down) along the left edges of tiles until a tile
+    //    is found whose vertical range contains the desired point.
+    if (point.y < getBottom(t))
     {
-        // 1. First move up (or down) along the left edges of tiles until a tile
-        //    is found whose vertical range contains the desired point.
-        while (getTop(t) < point.y) { t = t->above; }
-        while (getBottom(t) > point.y) { t = t->below; }
+        do { t = leftBottom(t); } while (t && (point.y < getBottom(t)));
+    }
+    else
+    {
+        while (t && (point.y >= getTop(t))) { t = rightTop(t); }
+    }
 
-        // 2. Then move left (or right) along the bottom edges of tiles until a
-        //    tile is found whose horizontal range contains the desired point.
-        while (getRight(t) < point.x) { t = t->right; }
-        while (getLeft(t) > point.x) { t = t->left; }
+    if (t == nullptr) { return nullptr; }
+
+    // 2. Then move left (or right) along the bottom edges of tiles until a
+    //    tile is found whose horizontal range contains the desired point.
+    if (point.x < getLeft(t))
+    {
+        do
+        {
+            do { t = bottomLeft(t); } while (t && (point.x < getLeft(t)));
+            if ((t == nullptr) || (point.y < getTop(t))) { break; }
+            do { t = rightTop(t); } while (point.y >= getTop(t));
+        } while (point.x < getLeft(t));
 
         // 3. Since the horizontal motion may have caused a vertical
         //    misalignment, steps 1 and 2 may have to be iterated several times
         //    to locate the tile containing the point.
+    }
+    else
+    {
+        while (point.x >= getRight(t))
+        {
+            do t = topRight(t); while (t && (point.x >= getRight(t)));
+            if ((t == nullptr) || (point.y >= getBottom(t))) { break; }
+            do t = leftBottom(t); while (t && (point.y < getBottom(t)));
+            if (t == nullptr) { break; }
+        }
     }
 
     return t;
@@ -42,9 +64,10 @@ CENTO_FORCEINLINE Tile* findTileAt(Tile*        start,
 
 CENTO_FORCEINLINE Tile* findTileAt(const Plane& plane, const Point& point)
 {
-    plane.hint = findTileAt(plane.hint ? plane.hint : plane.start, point);
+    Tile* t = findTileAt(plane.hint, point);
+    if (t) { plane.hint = t; }
 
-    return plane.hint;
+    return t;
 }
 
 CENTO_END_NAMESPACE

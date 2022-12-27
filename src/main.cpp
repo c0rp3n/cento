@@ -8,6 +8,10 @@
 #include "cento/centoRemove.hpp"
 
 #include <array>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
 #include <vector>
 
 namespace
@@ -60,6 +64,99 @@ namespace
         printf("%s %lu (%d, %d) - (%d, %d)\n", message, t->id, r.ll.x, r.ll.y, r.ur.x, r.ur.y);
     }
 
+    bool validate_tiling(cento::Plane& plane)
+    {
+        i32 count = 0;
+        cento::queryAll(plane, [&](cento::Tile* t)
+        {
+            if (not isSpace(t)) { return; }
+
+            const bool left  = bottomLeft(t) ? isSolid(bottomLeft(t)) : true;
+            const bool right = topRight(t) ? isSolid(topRight(t)) : true;
+            if (left && right) { return; }
+
+            print_tile("failed to merge", t);
+            if (not left) { print_tile("with left", bottomLeft(t)); }
+            if (not right) { print_tile("with right", topRight(t)); }
+
+            ++count;
+        });
+
+        return count == 0;
+    }
+
+    using Snapshot = std::vector<cento::TilePlan>;
+
+    Snapshot snapshot(cento::Plane& plane)
+    {
+        Snapshot tiles;
+        cento::queryAll(plane, [&](const cento::Tile* t)
+        {
+            tiles.emplace_back(t->id, getRect(t));
+        });
+
+        return tiles;
+    }
+
+    cento::Rect bounds(const Snapshot& snapshot)
+    {
+
+        cento::Rect r{{cento::pInfinity, cento::pInfinity},
+                      {cento::nInfinity, cento::nInfinity}};
+        for (const cento::TilePlan& plan : snapshot)
+        {
+            if (plan.id == cento::Space) { continue; }
+
+            r.ll.x = std::min(r.ll.x, plan.rect.ll.x);
+            r.ll.y = std::min(r.ll.y, plan.rect.ll.y);
+            r.ur.x = std::max(r.ur.x, plan.rect.ur.x);
+            r.ur.y = std::max(r.ur.y, plan.rect.ur.y);
+        }
+
+        r.ll.x -= 100;
+        r.ll.y -= 100;
+        r.ur.x += 100;
+        r.ur.y += 100;
+
+        return r;
+    }
+
+    std::string snapshotToObj(const Snapshot& snapshot)
+    {
+        std::stringstream ss;
+
+        const cento::Rect bound = bounds(snapshot);
+
+        u64 i = 1;
+        for (const cento::TilePlan& plan : snapshot)
+        {
+            const cento::Rect& r  = plan.rect;
+            const cento::Point ll = {std::max(r.ll.x, bound.ll.x),
+                                     std::max(r.ll.y, bound.ll.y)};
+            const cento::Point ur = {std::min(r.ur.x, bound.ur.x),
+                                     std::min(r.ur.y, bound.ur.y)};
+
+            if (plan.id == cento::Space)
+            {
+                ss << "usemtl space\n";
+            }
+            else
+            {
+                ss << "usemtl solid\n";
+            }
+
+            ss << "v " << ll.x << ' ' << ll.y << '\n';
+            ss << "v " << ll.x << ' ' << ur.y << '\n';
+            ss << "v " << ur.x << ' ' << ur.y << '\n';
+            ss << "v " << ur.x << ' ' << ll.y << '\n';
+            ss << "f " << i << ' ' << i + 1 << ' ' << i + 2 << ' ' << i + 3 << '\n';
+
+            i += 4;
+        }
+
+        return ss.str();
+    }
+
 }
 
 int main(const int argc, const char* argv[])
@@ -81,6 +178,8 @@ int main(const int argc, const char* argv[])
     std::vector<cento::Tile*> tiles;
     for (const cento::Rect& r : rects)
     {
+        const Snapshot before = snapshot(plane);
+
         const cento::TilePlan plan{id++, r};
         cento::Tile* const    tile = cento::insertTile(plane, plan);
         if (tile == nullptr)
@@ -95,6 +194,20 @@ int main(const int argc, const char* argv[])
             continue;
         }
 
+        if (not validate_tiling(plane))
+        {
+            const Snapshot after = snapshot(plane);
+
+            std::ofstream bFile{"before.obj"};
+            std::ofstream aFile{"after.obj"};
+
+            bFile << snapshotToObj(before);
+            aFile << snapshotToObj(after);
+
+            printf("failed to insert tile %lu (%d, %d) - (%d, %d)\n", plan.id, r.ll.x, r.ll.y, r.ur.x, r.ur.y);
+            return -1;
+        }
+
         tiles.push_back(tile);
     }
 
@@ -102,20 +215,22 @@ int main(const int argc, const char* argv[])
     {
         print_tile("removing", tile);
 
+        const Snapshot before = snapshot(plane);
+
         cento::removeTile(plane, tile);
 
-        cento::queryAll(plane, [](cento::Tile* t)
+        if (not validate_tiling(plane))
         {
-            if (not isSpace(t)) { return; }
+            const Snapshot after = snapshot(plane);
 
-            const bool left  = bottomLeft(t) ? isSolid(bottomLeft(t)) : true;
-            const bool right = topRight(t) ? isSolid(topRight(t)) : true;
-            if (left && right) { return; }
+            std::ofstream bFile{"before.obj"};
+            std::ofstream aFile{"after.obj"};
 
-            print_tile("failed to merge", t);
-            if (not left) { print_tile("with left", bottomLeft(t)); }
-            if (not right) { print_tile("with right", topRight(t)); }
-        });
+            bFile << snapshotToObj(before);
+            aFile << snapshotToObj(after);
+
+            return -1;
+        }
     }
 
     i32 count = 0;
