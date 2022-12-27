@@ -100,18 +100,20 @@ CENTO_FORCEINLINE void rightTiles(const Tile* tile, F&& callback)
                          [](const Tile* t) { return leftBottom(t); });
 }
 
-CENTO_FORCEINLINE bool empty(const Plane& plane, const Rect& r)
+CENTO_FORCEINLINE bool empty(const Plane& plane, const Rect& area)
 {
     // 1. Use the point finding algorithm to locate the tile containing the
     //    lower-left corner of the area of interest.
-    const Tile* tile = findTileAt(plane, r.ll);
-    i32         y    = r.ll.y;
+    cento::Point here = {area.ll.x, area.ur.y - 1};
+    cento::Tile* tile = cento::findTileAt(plane, here);
 
-    do {
+    i64 here_y = here.y;
+    while(here_y >= area.ll.y)
+    {
         // 2. See if the tile is solid. If not, it must be a space tile. See if
         //    its right edge is within the area of interest. If so, either it is
         //    the edge of the layout or the edge of a solid tile.
-        if (isSolid(tile)) { return false; }
+        if (isSolid(tile) && (getRight(tile) > area.ll.x)) { return false; }
 
         // 3. If a solid tile was found in step 2, then the search is complete.
         //    If no solid tile was found, then move upwards to the next tile
@@ -119,18 +121,20 @@ CENTO_FORCEINLINE bool empty(const Plane& plane, const Rect& r)
         //    either by invoking the point-finding algorithm, or by traversing
         //    the lt stitch upwards and then traversing the br stitches right
         //    until the desired tile is found.
-        if (getRight(tile) < r.ur.x)
+        if (getRight(tile) < area.ur.x)
         {
             const Tile* const right = topRight(tile);
-            if (isSolid(right) || (getRight(right) < r.ur.x)) { return false; }
+            if (isSolid(right) || (getRight(right) < area.ur.x)) { return false; }
         }
 
-        y    = getTop(tile);
-        tile = leftTop(tile);
+
+        here_y = i64(getBottom(tile)) - 1;
+        here.y = i32(here_y);
+        tile   = cento::findTileAt(plane, here);
 
         // 4. Repeat steps 2 and 3 until either a solid tile is found or the top
         //    of the area of interest is reached.
-    } while (y < r.ur.y);
+    }
 
     return true;
 }
@@ -141,10 +145,10 @@ namespace detail
     template <typename F> requires std::invocable<F&&, Tile*>
     bool areaEnum(Tile*       enumRT,
                   i32         enumBottom,
-                  const Rect& rect,
+                  const Rect& area,
                   F&&         callback)
     {
-        const bool atBottom = (enumBottom <= rect.ll.y);
+        const bool atBottom = (enumBottom <= area.ll.y);
 
         /*
          * Begin examination of tiles along right edge.
@@ -155,7 +159,7 @@ namespace detail
          */
 
         i32 srchBottom = enumBottom;
-        if (srchBottom < rect.ll.y) { srchBottom = rect.ll.y; }
+        if (srchBottom < area.ll.y) { srchBottom = area.ll.y; }
 
         Tile* tp;
         Tile* tpLB;
@@ -172,7 +176,7 @@ namespace detail
             tpLB      = leftBottom(tp);
             tpNextTop = tpLB ? getTop(tpLB) : nInfinity; /* Since getTop(tpLB) comes from tp */
 
-            if ((getBottom(tp) < rect.ur.y) && (atBottom || (getBottom(tp) >= enumBottom)))
+            if ((getBottom(tp) < area.ur.y) && (atBottom || (getBottom(tp) >= enumBottom)))
             {
                 /*
                  * We extract more information from the tile, which we will use
@@ -198,9 +202,9 @@ namespace detail
                  * tiles to its right.
                  */
 
-                if (tpRight < rect.ur.x)
+                if (tpRight < area.ur.x)
                 {
-                    if (areaEnum(tpTR, tpBottom, rect, std::forward<F>(callback))) { return true; }
+                    if (areaEnum(tpTR, tpBottom, area, std::forward<F>(callback))) { return true; }
                 }
             }
         }
@@ -211,13 +215,13 @@ namespace detail
 }
 
 template <typename F> requires std::invocable<F&&, Tile*>
-CENTO_FORCEINLINE void query(const Plane& plane, const Rect& rect, F&& callback)
+CENTO_FORCEINLINE void query(const Plane& plane, const Rect& area, F&& callback)
 {
-    cento::Point here     = {rect.ll.x, rect.ur.y - 1};
+    cento::Point here     = {area.ll.x, area.ur.y - 1};
     cento::Tile* enumTile = cento::findTileAt(plane, here);
 
     i64 here_y = here.y;
-    while(here_y >= rect.ll.y)
+    while(here_y >= area.ll.y)
     {
         /*
          * Find the tile (tp) immediately below the one to be
@@ -251,12 +255,22 @@ CENTO_FORCEINLINE void query(const Plane& plane, const Rect& rect, F&& callback)
          * tiles to its right.
          */
 
-        if (enumRB.x < rect.ur.x)
+        if (enumRB.x < area.ur.x)
         {
-            if (detail::areaEnum(enumTR, enumRB.y, rect, std::forward<F>(callback))) { return; }
+            if (detail::areaEnum(enumTR, enumRB.y, area, std::forward<F>(callback))) { return; }
         }
         enumTile = tp;
     }
+}
+
+template <typename F> requires std::invocable<F&&, Tile*>
+CENTO_FORCEINLINE void queryAll(const Plane& plane, F&& callback)
+{
+    const i32  min = nInfinity + 1;
+    const i32  max = pInfinity - 1;
+    const Rect area{{min, min}, {max, max}};
+
+    query(plane, area, std::forward<F>(callback));
 }
 
 CENTO_END_NAMESPACE
