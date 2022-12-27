@@ -87,6 +87,9 @@ suite empty = []()
         expect(not cento::empty(plane, {.ll = {0, 0}, .ur = {400, 400}}));
         expect(not cento::empty(plane, {.ll = {-400, -400}, .ur = {0, 0}}));
         expect(not cento::empty(plane, {.ll = {0, -400}, .ur = {400, 0}}));
+
+        // side
+        expect(cento::empty(plane, {.ll = {256, 0}, .ur = {512, 256}}));
     };
 };
 

@@ -79,7 +79,7 @@ int main(const int argc, const char* argv[])
         cento::Tile* const    tile = cento::insertTile(plane, plan);
         if (tile == nullptr)
         {
-            printf("failed to insert tile %ld (%d, %d) - (%d, %d)\n", id, r.ll.x, r.ll.y, r.ur.x, r.ur.y);
+            printf("failed to insert tile %ld (%d, %d) - (%d, %d)\n", plan.id, r.ll.x, r.ll.y, r.ur.x, r.ur.y);
             return -1;
         }
 
@@ -89,6 +89,15 @@ int main(const int argc, const char* argv[])
     for (cento::Tile* const tile : tiles)
     {
         cento::removeTile(plane, tile);
+    }
+
+    i32 count = 0;
+    cento::queryAll(plane, [&](cento::Tile*){ ++count; });
+
+    if (count != 1)
+    {
+        printf("failed to delete tiles\n");
+        return -1;
     }
 
     return 0;

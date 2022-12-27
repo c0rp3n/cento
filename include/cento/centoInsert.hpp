@@ -37,7 +37,7 @@ CENTO_FORCEINLINE Tile* insertTile(Plane& plane, const TilePlan& plan)
     t = findTileAt(plane, plan.rect.ll);
     const HorzSplit split = splitTileHorz(plane, t, plan.rect.ll.y);
 
-    Tile* ret = split.upper;
+    Tile* ret = split ? split.upper : t;
 
     // 4. Work up the sides of the new tile. Each space tile must be split into
     //    two space tiles, one to the left of the new solid tile and one to the
