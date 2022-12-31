@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include <fmt/format.h>
+
 namespace
 {
 
@@ -45,7 +47,7 @@ namespace
             // skip when the tile is not a rectangle
             if ( (coor[0] != coor[2]) || (coor[3] != coor[5]) || (coor[4] != coor[6]) || (coor[7] != coor[1]) )
             {
-                fprintf(stderr, "Skipped invalid rectangle: (%d, %d) - (%d, %d) - (%d, %d) - (%d, %d)\n", coor[0], coor[1], coor[2], coor[3], coor[4], coor[5], coor[6], coor[7]);
+                fmt::print(stderr, "Skipped invalid rectangle: ({}, {}) - ({}, {}) - ({}, {}) - ({}, {})\n", coor[0], coor[1], coor[2], coor[3], coor[4], coor[5], coor[6], coor[7]);
                 continue;
             }
 
@@ -61,13 +63,14 @@ namespace
     void print_tile(const char* const message, const cento::TilePlan& plan)
     {
         const cento::Rect& r = plan.rect;
-        printf("%s %lu (%d, %d) - (%d, %d)\n",
-               message,
-               plan.id,
-               r.ll.x,
-               r.ll.y,
-               r.ur.x,
-               r.ur.y);
+
+        fmt::print("{} {} ({}, {}) - ({}, {})\n",
+                   message,
+                   plan.id,
+                   r.ll.x,
+                   r.ll.y,
+                   r.ur.x,
+                   r.ur.y);
     }
 
     void print_tile(const char* const message, const cento::Tile* const t)
@@ -172,14 +175,18 @@ namespace
 
 int main(const int argc, const char* argv[])
 {
-    if (argc < 2) { return -1; }
+    if (argc < 2)
+    {
+        fmt::print(stderr, "usage: {} <filename>\n", argv[0]);
+        return 1;
+    }
 
     const std::vector<cento::Rect> rects = read_midi(argv[1]);
 
-    printf("Rects (%zu):\n", rects.size());
+    fmt::print("Rect count {}:\n", rects.size());
     for (const cento::Rect& r : rects)
     {
-        printf("(%d, %d) - (%d, %d)\n", r.ll.x, r.ll.y, r.ur.x, r.ur.y);
+        fmt::print("({}, {}) - ({}, {})\n", r.ll.x, r.ll.y, r.ur.x, r.ur.y);
     }
 
     cento::Plane plane;
@@ -216,7 +223,7 @@ int main(const int argc, const char* argv[])
             aFile << snapshotToObj(after);
 
             print_tile("failed to insert tile", plan);
-            return -1;
+            return 2;
         }
 
         tiles.push_back(tile);
@@ -240,7 +247,7 @@ int main(const int argc, const char* argv[])
             bFile << snapshotToObj(before);
             aFile << snapshotToObj(after);
 
-            return -1;
+            return 2;
         }
     }
 
@@ -249,12 +256,12 @@ int main(const int argc, const char* argv[])
 
     if (count != 1)
     {
-        printf("failed to delete tiles\n");
+        fmt::print("failed to delete tiles\n");
         cento::queryAll(plane, [](cento::Tile* t)
         {
             print_tile("tile", t);
         });
-        return -1;
+        return 3;
     }
 
     return 0;

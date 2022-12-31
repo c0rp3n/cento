@@ -72,6 +72,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 add_library(Cento::cento ALIAS cento_lib)
 
 if(CENTO_ACUS)
+    include(cmake/CPM.cmake)
     add_subdirectory(acus)
 endif()
 
