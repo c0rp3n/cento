@@ -3,13 +3,25 @@
 ##  Copyright : Oliver John Hitchcock
 ##  SPDX-License-Identifier: BSL-1.0
 ## =============================================================================
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
 project(Cento
-    VERSION 0.0.01
+    VERSION 0.1.00
     DESCRIPTION "An implementation of John K. Outsterhout's Corner Stiching."
     LANGUAGES CXX
 )
+
+# determine whether this is a standalone project or included by other projects
+if (NOT DEFINED CENTO_STANDALONE_PROJECT)
+    if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+        set(CENTO_STANDALONE_PROJECT ON)
+    else()
+        set(CENTO_STANDALONE_PROJECT OFF)
+    endif ()
+endif()
+
+option(CENTO_ACUS  "Build the Acus application" ${CENTO_STANDALONE_PROJECT})
+option(CENTO_TESTS "Build tests"                ${CENTO_STANDALONE_PROJECT})
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -59,36 +71,10 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 
 add_library(Cento::cento ALIAS cento_lib)
 
-add_executable(cento_parse
-    src/main.cpp)
-set_target_properties(cento_parse PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
-target_include_directories(cento_parse
-    PRIVATE
-        "${PROJECT_SOURCE_DIR}/include"
-        "${PROJECT_SOURCE_DIR}/thirdparty/GSL/include"
-        "${PROJECT_SOURCE_DIR}/thirdparty/moneta/include"
-        "${PROJECT_SOURCE_DIR}/thirdparty/ut/include")
-target_link_libraries(cento_parse PRIVATE Cento::cento)
+if(CENTO_ACUS)
+    add_subdirectory(acus)
+endif()
 
-include(CTest)
-add_executable(cento_test
-    test/main.cpp
-    test/explore.cpp
-    test/find.cpp
-    test/insert.cpp
-    test/join.cpp
-    test/merge.cpp
-    test/point.cpp
-    test/rect.cpp
-    test/remove.cpp
-    test/split.cpp
-    test/tile.cpp)
-set_target_properties(cento_test PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
-target_include_directories(cento_test
-    PRIVATE
-        "${PROJECT_SOURCE_DIR}/include"
-        "${PROJECT_SOURCE_DIR}/thirdparty/GSL/include"
-        "${PROJECT_SOURCE_DIR}/thirdparty/moneta/include"
-        "${PROJECT_SOURCE_DIR}/thirdparty/ut/include")
-target_link_libraries(cento_test PRIVATE Cento::cento)
-add_test(NAME CentoTest COMMAND cento_test)
+if (CENTO_TESTS)
+    add_subdirectory(test)
+endif()

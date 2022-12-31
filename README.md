@@ -13,6 +13,10 @@
 Cento is an implementation of John K. Outsterhout's Corner Stitching in modern
 C++. It intends to be a generic library for testing different tile structures.
 
+It is named after the latin word cento which stands for "patchwork garment",
+the corner stitching data structure when visualised typically looks like a
+patchwork garment or quilt so it is a fitting name.
+
 ## Abstract
 
 Corner stitching is a technique for representing rectangular two-dimensional
