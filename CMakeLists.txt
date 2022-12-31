@@ -76,5 +76,6 @@ if(CENTO_ACUS)
 endif()
 
 if (CENTO_TESTS)
+    include(CTest)
     add_subdirectory(test)
 endif()

@@ -4,8 +4,6 @@
 ##  SPDX-License-Identifier: BSL-1.0
 ## =============================================================================
 
-include(CTest)
-
 add_executable(cento_test
     main.cpp
     explore.cpp
