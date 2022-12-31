@@ -145,6 +145,11 @@ int main(const int argc, const char* argv[])
     }
 
     const std::vector<cento::Rect> rects = parseMidi(argv[1]);
+    if (rects.empty())
+    {
+        fmt::print(stderr, "{} contains no valid rectangles\n", argv[1]);
+        return 1;
+    }
 
     fmt::print("Rect count {}:\n", rects.size());
     for (const cento::Rect& r : rects)
