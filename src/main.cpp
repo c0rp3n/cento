@@ -58,10 +58,21 @@ namespace
         return rects;
     }
 
+    void print_tile(const char* const message, const cento::TilePlan& plan)
+    {
+        const cento::Rect& r = plan.rect;
+        printf("%s %lu (%d, %d) - (%d, %d)\n",
+               message,
+               plan.id,
+               r.ll.x,
+               r.ll.y,
+               r.ur.x,
+               r.ur.y);
+    }
+
     void print_tile(const char* const message, const cento::Tile* const t)
     {
-        const cento::Rect r = getRect(t);
-        printf("%s %lu (%d, %d) - (%d, %d)\n", message, t->id, r.ll.x, r.ll.y, r.ur.x, r.ur.y);
+        print_tile(message, cento::TilePlan{.id = t->id, .rect = getRect(t)});
     }
 
     bool validate_tiling(cento::Plane& plane)
@@ -184,7 +195,7 @@ int main(const int argc, const char* argv[])
         cento::Tile* const    tile = cento::insertTile(plane, plan);
         if (tile == nullptr)
         {
-            printf("failed to insert tile %lu (%d, %d) - (%d, %d)\n", plan.id, r.ll.x, r.ll.y, r.ur.x, r.ur.y);
+            print_tile("failed to insert tile", plan);
             cento::query(plane, r, [](cento::Tile* t)
             {
                 if (isSpace(t)) { return; }
@@ -204,7 +215,7 @@ int main(const int argc, const char* argv[])
             bFile << snapshotToObj(before);
             aFile << snapshotToObj(after);
 
-            printf("failed to insert tile %lu (%d, %d) - (%d, %d)\n", plan.id, r.ll.x, r.ll.y, r.ur.x, r.ur.y);
+            print_tile("failed to insert tile", plan);
             return -1;
         }
 
