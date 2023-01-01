@@ -20,13 +20,25 @@ namespace
 namespace ast
 {
 
+    template<std::size_t ... I, typename ... Coords>
+    constexpr void set_poly(i32 (&coords)[8],
+                            std::index_sequence<I...>,
+                            Coords ... inCoords)
+    {
+        (static_cast<void>(coords[I] = inCoords), ...);
+    }
+
     struct poly
     {
         i32 coords[8];
 
-        constexpr poly(i32 c0, i32 c1, i32 c2, i32 c3, i32 c4, i32 c5, i32 c6, i32 c7)
-            : coords(c0, c1, c2, c3, c4, c5, c6, c7)
+        template<typename ... Coords>
+        constexpr poly(Coords ... inCoords)
         {
+            static_assert(sizeof...(Coords) == 8);
+            set_poly(coords,
+                     std::index_sequence_for<Coords...>{},
+                     std::forward<Coords>(inCoords)...);
         }
     };
 
