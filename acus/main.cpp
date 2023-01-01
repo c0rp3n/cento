@@ -151,14 +151,12 @@ int main(const int argc, const char* argv[])
         return 1;
     }
 
-    fmt::print("Rect count {}:\n", rects.size());
-    for (const cento::Rect& r : rects)
-    {
-        fmt::print("({}, {}) - ({}, {})\n", r.ll.x, r.ll.y, r.ur.x, r.ur.y);
-    }
+    fmt::print("Rectangle count {}:\n", rects.size());
 
     cento::Plane plane;
     cento::createUniverse(plane);
+
+    fmt::print("inserting rectangles...\n");
 
     u64 id = 0;
     std::vector<cento::Tile*> tiles;
@@ -197,10 +195,11 @@ int main(const int argc, const char* argv[])
         tiles.push_back(tile);
     }
 
+    fmt::print("rectangles inserted succesfully\n");
+    fmt::print("removing rectangles...\n");
+
     for (cento::Tile* const tile : tiles)
     {
-        print_tile("removing", tile);
-
         const Snapshot before = snapshot(plane);
 
         cento::removeTile(plane, tile);
@@ -231,6 +230,8 @@ int main(const int argc, const char* argv[])
         });
         return 3;
     }
+
+    fmt::print("all rectangles deleted succesfully\n");
 
     return 0;
 }
