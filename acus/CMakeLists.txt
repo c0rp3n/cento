@@ -7,7 +7,7 @@
 CPMAddPackage("gh:fmtlib/fmt#9.1.0")
 CPMAddPackage("gh:foonathan/lexy#v2022.12.0")
 
-add_executable(cento_acus main.cpp midi.cpp)
+add_executable(cento_acus main.cpp lisp.cpp midi.cpp)
 
 set_target_properties(cento_acus PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 

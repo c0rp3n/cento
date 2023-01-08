@@ -1,0 +1,11 @@
+; res symbol
+(symbol "res" ((0 0 20 20)
+               (0 80 20 100)
+               (-20 40 0 60)))
+
+; instances of res
+(inst "res" (0 0))
+(inst "res" (0 120))
+(inst "res" (0 240))
+(inst "res" (0 360))
+(inst "res" (0 480))
