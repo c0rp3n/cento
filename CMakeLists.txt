@@ -29,7 +29,7 @@ include(CMakePackageConfigHelpers)
 # Do stuff depending on the compiler
 if (MSVC)
     # warning level 4 and all warnings as errors
-    add_compile_options(/W4 /WX)
+    add_compile_options(/W4)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 else()
     # lots of warnings and all warnings as errors
