@@ -280,5 +280,23 @@ std::vector<cento::Rect> parseLisp(const std::string_view path)
         fmt::print("inst: \"{}\" ({}, {})\n", inst.symbol, inst.origin.x, inst.origin.y);
     }
 
+    for (const ast::instance& inst : plan.instances)
+    {
+        auto s = std::ranges::find_if(plan.symbols, [&](const ast::symbol& sym)
+        {
+            return sym.name == inst.symbol;
+        });
+        if (s == cend(plan.symbols))
+        {
+            fmt::print("missing symbol: \"{}\"\n", inst.symbol);
+            continue;
+        }
+
+        for (const cento::Rect& r : s->pads)
+        {
+            rects.emplace_back(cento::translate(r, inst.origin));
+        }
+    }
+
     return rects;
 }

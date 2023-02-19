@@ -175,7 +175,7 @@ int main(const int argc, const char* argv[])
         return 1;
     }
 
-    fmt::print("Rectangle count {}:\n", rects.size());
+    fmt::print("rectangle count {}:\n", rects.size());
 
     cento::Plane plane;
     cento::createUniverse(plane);

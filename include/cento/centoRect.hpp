@@ -42,6 +42,11 @@ CENTO_FORCEINLINE bool contains(const Rect& rect, const Point& point)
            (point.x <= rect.ur.x) && (point.y <= rect.ur.y);
 }
 
+CENTO_FORCEINLINE Rect translate(const Rect& rect, const Point& delta)
+{
+    return { .ll = translate(rect.ll, delta), .ur = translate(rect.ur, delta)};
+}
+
 CENTO_END_NAMESPACE
 
 #endif // centoRect_hpp

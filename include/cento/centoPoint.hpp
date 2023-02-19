@@ -32,6 +32,11 @@ struct Point
 };
 static_assert(std::is_trivial_v<Point>);
 
+CENTO_FORCEINLINE Point translate(const Point& point, const Point& delta)
+{
+    return {.x = point.x + delta.x, .y = point.y + delta.y};
+}
+
 CENTO_END_NAMESPACE
 
 #endif // centoVertex_hpp
