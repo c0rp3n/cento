@@ -220,7 +220,7 @@ namespace
             cento::queryAll(plane, [](cento::Tile* t)
             {
                 print_tile("tile", t);
-                });
+            });
             return 3;
         }
 
