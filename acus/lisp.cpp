@@ -13,6 +13,7 @@
 #include <lexy/callback.hpp>
 #include <lexy/dsl.hpp>
 #include <lexy/input/file.hpp>
+#include <lexy/input/string_input.hpp>
 
 #include <lexy_ext/report_error.hpp>
 
@@ -39,7 +40,7 @@ namespace ast
         std::variant<symbol, instance> v;
 
         template <typename T>
-        statement(T t) : v(std::move(t))
+        constexpr statement(T&& t) : v(std::move(t))
         {}
     };
 
@@ -60,37 +61,45 @@ namespace grammar
     // Supports decimal literals.
     struct integer : lexy::token_production
     {
-        static constexpr auto rule  = dsl::integer<i32>;
-        static constexpr auto value = lexy::forward<i32>;
+        static constexpr auto rule  = dsl::minus_sign + dsl::integer<i32>;
+        static constexpr auto value = lexy::as_integer<i32>;
     };
 
     // An string literal.
     // Supports alpha numeric characters only.
     struct string : lexy::token_production
     {
-        static constexpr auto rule  = []() { return dsl::quoted(dsl::unicode::alnum); };
+        struct invalid_char
+        {
+            static LEXY_CONSTEVAL auto name()
+            {
+                return "invalid character in string literal";
+            }
+        };
+
+        static constexpr auto rule  = []()
+        {
+            auto code_point = dsl::unicode::alnum.error<invalid_char>;
+            return dsl::quoted(code_point);
+        }();
         static constexpr auto value = lexy::as_string<std::string, lexy::utf8_encoding>;
     };
 
-    constexpr auto ws = dsl::whitespace(dsl::ascii::blank / dsl::ascii::newline);
+    constexpr auto ws = dsl::whitespace(dsl::ascii::space);
 
-    struct point : lexy::token_production
+    struct point
     {
-        static constexpr auto rule  = []()
-        {
-            return dsl::round_bracketed(dsl::times<2>(ws + dsl::p<integer> + ws));
-        };
-
+        static constexpr auto whitespace = ws;
+    
+        static constexpr auto rule  = dsl::round_bracketed(dsl::times<2>(ws + dsl::p<integer> + ws));
         static constexpr auto value = lexy::construct<cento::Point>;
     };
 
     struct rect : lexy::token_production
     {
-        static constexpr auto rule  = []()
-        {
-            return dsl::round_bracketed(dsl::times<4>(ws + dsl::p<integer> + ws));
-        };
+        static constexpr auto whitespace = ws;
 
+        static constexpr auto rule  = dsl::round_bracketed(dsl::times<2>(ws + dsl::p<point> + ws));
         static constexpr auto value = lexy::construct<cento::Rect>;
     };
 
@@ -103,20 +112,22 @@ namespace grammar
 
     // We allow surrounding the document with comments and whitespace.
     // (Whitespace does not allow productions, so we need to inline it).
-    constexpr auto ws_comment = ws | dsl::inline_<comment> ;
+    constexpr auto ws_comment = ws | dsl::inline_<comment>;
 
     struct rects : lexy::transparent_production
     {
         static constexpr auto rule  = []()
         {
             return dsl::round_bracketed.opt_list(ws + dsl::p<rect> + ws);
-        };
+        }();
 
         static constexpr auto value = lexy::as_list<std::vector<cento::Rect>>;
     };
 
-    struct symbol
+    struct symbol : lexy::token_production
     {
+        static constexpr auto whitespace = ws;
+
         static constexpr auto rule = []()
         {
             auto content = LEXY_LIT("symbol") +
@@ -126,14 +137,16 @@ namespace grammar
                            dsl::p<rects> +
                            ws;
 
-            return ws + dsl::round_bracketed(content);
-        };
+            return dsl::round_bracketed(content);
+        }();
 
         static constexpr auto value = lexy::construct<ast::symbol>;
     };
 
-    struct inst
+    struct inst : lexy::token_production
     {
+        static constexpr auto whitespace = ws;
+
         static constexpr auto rule = []()
         {
             auto content = LEXY_LIT("inst") +
@@ -144,13 +157,15 @@ namespace grammar
                            ws;
 
             return dsl::round_bracketed(content);
-        };
+        }();
 
         static constexpr auto value = lexy::construct<ast::instance>;
     };
 
     struct statement : lexy::transparent_production
     {
+        static constexpr auto name = "statement";
+
         struct expected_statement
         {
             static LEXY_CONSTEVAL auto name()
@@ -161,55 +176,16 @@ namespace grammar
 
         static constexpr auto rule = []()
         {
-            return dsl::p<symbol> | dsl::p<inst> | dsl::error<expected_statement>;
-        };
+            auto sym  = dsl::peek(LEXY_LIT("(symbol")) >> dsl::p<symbol>;
+            auto i    = dsl::peek(LEXY_LIT("(inst")) >> dsl::p<inst>;
+            return sym | i | dsl::error<expected_statement>;
+        }();
 
         static constexpr auto value = lexy::construct<ast::statement>;
     };
 
     struct lisp
     {
-        struct as_plan
-        {
-            using return_type = ast::plan;
-
-            constexpr ast::plan operator()(lexy::nullopt&&) const
-            {
-                return ast::plan();
-            }
-
-            template <typename... Args>
-            constexpr auto operator()(Args&&... args) const
-            {
-                return ast::plan();
-            }
-
-            struct plan_sink
-            {
-                ast::plan plan;
-
-                constexpr void operator()(ast::symbol&& sym)
-                {
-                    plan.symbols.emplace_back(LEXY_FWD(sym));
-                }
-
-                constexpr void operator()(ast::instance&& inst)
-                {
-                    plan.instances.emplace_back(LEXY_FWD(inst));
-                }
-
-                constexpr ast::plan&& finish() &&
-                {
-                    return LEXY_MOV(plan);
-                }
-            };
-
-            constexpr auto sink() const
-            {
-                return plan_sink{};
-            }
-        };
-
         // Whitespace is a sequence of space, tab, carriage return, or newline.
         // Add your comment syntax here.
         static constexpr auto whitespace = ws;
@@ -217,14 +193,49 @@ namespace grammar
         static constexpr auto rule = []()
         {
             auto at_eof = dsl::peek(dsl::eof);
-            return ws_comment + dsl::terminator(at_eof).opt_list(dsl::p<statement>);
-        };
+            return ws_comment + dsl::terminator(at_eof).opt_list(ws_comment + dsl::p<statement>) + ws_comment;
+        }();
 
-        static constexpr auto value = as_plan{};
+        static constexpr auto value = lexy::as_list<std::vector<ast::statement>>;
     };
 
 }
 
+}
+
+int testLisp()
+{
+    auto error = lexy_ext::report_error;
+
+    int count = 0;
+    if (not lexy::parse<grammar::point>(lexy::zstring_input(u8"(0 0)"), error)) { ++count; }
+    if (not lexy::parse<grammar::point>(lexy::zstring_input(u8"(  0   0   )"), error)) { ++count; }
+    if (not lexy::parse<grammar::point>(lexy::zstring_input(u8"(-110 -100)"), error)) { ++count; }
+
+    if (not lexy::parse<grammar::string>(lexy::zstring_input(u8"\"helloWorld\""), error)) { ++count; }
+    if (not lexy::parse<grammar::string>(lexy::zstring_input(u8"\"sym\""), error)) { ++count; }
+
+    if (not lexy::parse<grammar::rect>(lexy::zstring_input(u8"((0 0) (100 100))"), error)) { ++count; }
+    if (not lexy::parse<grammar::rect>(lexy::zstring_input(u8"( (100    0) (-100   100)   )"), error)) { ++count; }
+
+    if (not lexy::parse<grammar::rect>(lexy::zstring_input(u8"((0 0) (100 100)) ((0 0) (100 100))"), error)) { ++count; }
+    if (not lexy::parse<grammar::rect>(lexy::zstring_input(u8"((0 0) (100 100))((0 0) (100 100))((0 0) (100 100))"), error)) { ++count; }
+
+    if (not lexy::parse<grammar::symbol>(lexy::zstring_input(u8"(symbol \"helloWorld\" (((0 0) (100 100))))"), error)) { ++count; }
+    if (not lexy::parse<grammar::symbol>(lexy::zstring_input(u8"(symbol \"sym\" (((0 0) (100 100)) ((0 0) (100 100))))"), error)) { ++count; }
+
+    if (not lexy::parse<grammar::inst>(lexy::zstring_input(u8"(inst \"helloWorld\" (0 0))"), error)) { ++count; }
+    if (not lexy::parse<grammar::inst>(lexy::zstring_input(u8"(inst \"sym\" (100 100))"), error)) { ++count; }
+
+    if (not lexy::parse<grammar::statement>(lexy::zstring_input(u8"(symbol \"helloWorld\" (((0 0) (100 100))))"), error)) { ++count; }
+    if (not lexy::parse<grammar::statement>(lexy::zstring_input(u8"(inst \"helloWorld\" (0 0))"), error)) { ++count; }
+
+    if (not lexy::parse<grammar::comment>(lexy::zstring_input(u8";test123\n"), error)) { ++count; }
+    if (not lexy::parse<grammar::comment>(lexy::zstring_input(u8"; test asigfasd fasfdasd\n"), error)) { ++count; }
+
+    if (count) { fmt::print("failed: {}\n", count); }
+
+    return count;
 }
 
 std::vector<cento::Rect> parseLisp(const std::string_view path)
@@ -236,8 +247,30 @@ std::vector<cento::Rect> parseLisp(const std::string_view path)
         file.buffer(), lexy_ext::report_error.path(path.data()));
     if (!document) { return {}; }
 
+    ast::plan plan;
+
+    const std::vector<ast::statement>& statements = document.value();
+    for (const ast::statement& s : statements)
+    {
+        std::visit([&](auto&& v)
+        {
+            using T = std::decay_t<decltype(v)>;
+            if constexpr (std::is_same_v<T, ast::symbol>)
+            {
+                plan.symbols.push_back(v);
+            }
+            else if constexpr (std::is_same_v<T, ast::instance>)
+            {
+                plan.instances.push_back(v);
+            }
+            else
+            {
+                static_assert(always_false_v<T>, "non-exhaustive visitor!");
+            }
+        }, s.v);
+    }
+
     std::vector<cento::Rect> rects;
-    const ast::plan& plan = document.value();
     for (const ast::symbol& sym : plan.symbols)
     {
         fmt::print("sym: \"{}\" pad count {}\n", sym.name, sym.pads.size());

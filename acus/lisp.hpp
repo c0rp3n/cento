@@ -14,6 +14,7 @@
 
 #include "cento/centoRect.hpp"
 
+int                      testLisp();
 std::vector<cento::Rect> parseLisp(const std::string_view path);
 
 #endif // lisp_hpp

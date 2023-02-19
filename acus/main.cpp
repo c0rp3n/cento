@@ -139,17 +139,28 @@ namespace
 
 int main(const int argc, const char* argv[])
 {
-    if (argc < 3)
+    if (argc < 2)
     {
-        fmt::print(stderr, "usage: {} <type> <filename>\n", argv[0]);
+        fmt::print(stderr, "usage: {} <type> [filename]\n", argv[0]);
         return 1;
     }
 
-    std::vector<cento::Rect> rects;
-
     const std::string_view type{argv[1]};
+
+    if (type == "tlisp")
+    {
+        return testLisp();
+    }
+
+    if (argc < 3)
+    {
+        fmt::print(stderr, "usage: {} <type> [filename]\n", argv[0]);
+        return 1;
+    }
+
     const std::string_view path{argv[2]};
 
+    std::vector<cento::Rect> rects;
     if (type == "lisp") { rects = parseLisp(path); }
     else if (type == "midi") { rects = parseMidi(path); }
     else

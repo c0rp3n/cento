@@ -5,7 +5,7 @@
 ## =============================================================================
 
 CPMAddPackage("gh:fmtlib/fmt#9.1.0")
-CPMAddPackage("gh:foonathan/lexy#v2022.12.0")
+CPMAddPackage("gh:foonathan/lexy#v2022.12.1")
 
 add_executable(cento_acus main.cpp lisp.cpp midi.cpp)
 
