@@ -6,6 +6,8 @@
 
 #include "lisp.hpp"
 
+#include <algorithm>
+#include <ranges>
 #include <variant>
 #include <fmt/format.h>
 
