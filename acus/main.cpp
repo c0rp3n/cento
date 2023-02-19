@@ -135,6 +135,100 @@ namespace
         return ss.str();
     }
 
+    int runCento(const std::vector<cento::Rect>& rects,
+                 const std::string_view          path)
+    {
+        if (rects.empty())
+        {
+            fmt::print(stderr, "{} contains no valid rectangles\n", path);
+            return 1;
+        }
+
+        fmt::print("rectangle count {}:\n", rects.size());
+
+        cento::Plane plane;
+        cento::createUniverse(plane);
+
+        fmt::print("inserting rectangles...\n");
+
+        u64 id = 0;
+        std::vector<cento::Tile*> tiles;
+        for (const cento::Rect& r : rects)
+        {
+            const Snapshot before = snapshot(plane);
+
+            const cento::TilePlan plan{id++, r};
+            cento::Tile* const    tile = cento::insertTile(plane, plan);
+            if (tile == nullptr)
+            {
+                print_tile("failed to insert tile", plan);
+                cento::query(plane, r, [](cento::Tile* t)
+                {
+                    if (isSpace(t)) { return; }
+
+                    print_tile("overlaps with tile", t);
+                });
+                continue;
+            }
+
+            if (not validate_tiling(plane))
+            {
+                const Snapshot after = snapshot(plane);
+
+                std::ofstream bFile{"before.obj"};
+                std::ofstream aFile{"after.obj"};
+
+                bFile << snapshotToObj(before);
+                aFile << snapshotToObj(after);
+
+                print_tile("failed to insert tile", plan);
+                return 2;
+            }
+
+            tiles.push_back(tile);
+        }
+
+        fmt::print("rectangles inserted succesfully\n");
+        fmt::print("removing rectangles...\n");
+
+        for (cento::Tile* const tile : tiles)
+        {
+            const Snapshot before = snapshot(plane);
+
+            cento::removeTile(plane, tile);
+
+            if (not validate_tiling(plane))
+            {
+                const Snapshot after = snapshot(plane);
+
+                std::ofstream bFile{"before.obj"};
+                std::ofstream aFile{"after.obj"};
+
+                bFile << snapshotToObj(before);
+                aFile << snapshotToObj(after);
+
+                return 2;
+            }
+        }
+
+        i32 count = 0;
+        cento::queryAll(plane, [&](cento::Tile*){ ++count; });
+
+        if (count != 1)
+        {
+            fmt::print("failed to delete tiles\n");
+            cento::queryAll(plane, [](cento::Tile* t)
+            {
+                print_tile("tile", t);
+                });
+            return 3;
+        }
+
+        fmt::print("all rectangles deleted succesfully\n");
+
+        return 0;
+    }
+
 }
 
 int main(const int argc, const char* argv[])
@@ -160,102 +254,15 @@ int main(const int argc, const char* argv[])
 
     const std::string_view path{argv[2]};
 
-    std::vector<cento::Rect> rects;
-    if (type == "lisp") { rects = parseLisp(path); }
-    else if (type == "midi") { rects = parseMidi(path); }
-    else
+    if (type == "lisp")
     {
-        fmt::print(stderr, "unknown file type {}\n", type);
-        return 1;
+        return runCento(parseLisp(path), path);
+    }
+    if (type == "midi")
+    {
+        return runCento(parseMidi(path), path);
     }
 
-    if (rects.empty())
-    {
-        fmt::print(stderr, "{} contains no valid rectangles\n", path);
-        return 1;
-    }
-
-    fmt::print("rectangle count {}:\n", rects.size());
-
-    cento::Plane plane;
-    cento::createUniverse(plane);
-
-    fmt::print("inserting rectangles...\n");
-
-    u64 id = 0;
-    std::vector<cento::Tile*> tiles;
-    for (const cento::Rect& r : rects)
-    {
-        const Snapshot before = snapshot(plane);
-
-        const cento::TilePlan plan{id++, r};
-        cento::Tile* const    tile = cento::insertTile(plane, plan);
-        if (tile == nullptr)
-        {
-            print_tile("failed to insert tile", plan);
-            cento::query(plane, r, [](cento::Tile* t)
-            {
-                if (isSpace(t)) { return; }
-
-                print_tile("overlaps with tile", t);
-            });
-            continue;
-        }
-
-        if (not validate_tiling(plane))
-        {
-            const Snapshot after = snapshot(plane);
-
-            std::ofstream bFile{"before.obj"};
-            std::ofstream aFile{"after.obj"};
-
-            bFile << snapshotToObj(before);
-            aFile << snapshotToObj(after);
-
-            print_tile("failed to insert tile", plan);
-            return 2;
-        }
-
-        tiles.push_back(tile);
-    }
-
-    fmt::print("rectangles inserted succesfully\n");
-    fmt::print("removing rectangles...\n");
-
-    for (cento::Tile* const tile : tiles)
-    {
-        const Snapshot before = snapshot(plane);
-
-        cento::removeTile(plane, tile);
-
-        if (not validate_tiling(plane))
-        {
-            const Snapshot after = snapshot(plane);
-
-            std::ofstream bFile{"before.obj"};
-            std::ofstream aFile{"after.obj"};
-
-            bFile << snapshotToObj(before);
-            aFile << snapshotToObj(after);
-
-            return 2;
-        }
-    }
-
-    i32 count = 0;
-    cento::queryAll(plane, [&](cento::Tile*){ ++count; });
-
-    if (count != 1)
-    {
-        fmt::print("failed to delete tiles\n");
-        cento::queryAll(plane, [](cento::Tile* t)
-        {
-            print_tile("tile", t);
-        });
-        return 3;
-    }
-
-    fmt::print("all rectangles deleted succesfully\n");
-
-    return 0;
+    fmt::print(stderr, "unknown file type {}\n", type);
+    return 1;
 }
