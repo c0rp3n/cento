@@ -19,10 +19,10 @@
 
 #include <lexy_ext/report_error.hpp>
 
-template<class> inline constexpr bool always_false_v = false;
-
 namespace
 {
+
+template<class> inline constexpr bool always_false_v = false;
 
 namespace ast
 {
