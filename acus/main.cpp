@@ -18,6 +18,7 @@
 
 #include <fmt/format.h>
 
+#include "lisp.hpp"
 #include "midi.hpp"
 
 namespace
@@ -140,18 +141,41 @@ int main(const int argc, const char* argv[])
 {
     if (argc < 2)
     {
-        fmt::print(stderr, "usage: {} <filename>\n", argv[0]);
+        fmt::print(stderr, "usage: {} <type> [filename]\n", argv[0]);
         return 1;
     }
 
-    const std::vector<cento::Rect> rects = parseMidi(argv[1]);
+    const std::string_view type{argv[1]};
+
+    if (type == "tlisp")
+    {
+        return testLisp();
+    }
+
+    if (argc < 3)
+    {
+        fmt::print(stderr, "usage: {} <type> [filename]\n", argv[0]);
+        return 1;
+    }
+
+    const std::string_view path{argv[2]};
+
+    std::vector<cento::Rect> rects;
+    if (type == "lisp") { rects = parseLisp(path); }
+    else if (type == "midi") { rects = parseMidi(path); }
+    else
+    {
+        fmt::print(stderr, "unknown file type {}\n", type);
+        return 1;
+    }
+
     if (rects.empty())
     {
-        fmt::print(stderr, "{} contains no valid rectangles\n", argv[1]);
+        fmt::print(stderr, "{} contains no valid rectangles\n", path);
         return 1;
     }
 
-    fmt::print("Rectangle count {}:\n", rects.size());
+    fmt::print("rectangle count {}:\n", rects.size());
 
     cento::Plane plane;
     cento::createUniverse(plane);
