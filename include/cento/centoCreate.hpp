@@ -29,13 +29,13 @@ CENTO_FORCEINLINE Tile* createTile(Plane& plane, const TilePlan& plan)
     return ret;
 }
 
+inline constexpr Rect universeRect{.ll = {.x = nInfinity, .y = nInfinity},
+                                   .ur = {.x = pInfinity, .y = pInfinity}};
+
 CENTO_FORCEINLINE Tile* createUniverse(Plane& plane)
 {
-    const Rect r{.ll = {.x = nInfinity, .y = nInfinity},
-                 .ur = {.x = pInfinity, .y = pInfinity}};
-
     plane.hint  = get(plane);
-    *plane.hint = Tile{.rect = r,
+    *plane.hint = Tile{.rect = universeRect,
                        .id = Space,
                        .below = nullptr,
                        .left = nullptr,

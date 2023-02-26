@@ -14,6 +14,7 @@ add_executable(cento_test
     point.cpp
     rect.cpp
     remove.cpp
+    snapshot.cpp
     split.cpp
     tile.cpp)
 
