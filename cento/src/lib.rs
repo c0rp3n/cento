@@ -296,8 +296,8 @@ impl Plane {
                     break;
                 }
 
-                while let Some(k) = below!(self, t) {
-                    t = k;
+                loop {
+                    t = below!(self, t).unwrap();
                     if point.y() >= min_y!(self, t) {
                         break;
                     }
