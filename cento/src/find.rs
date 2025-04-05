@@ -2,7 +2,6 @@
 use crate::*;
 
 impl Plane {
-
     pub fn find_tile_from(&self, start: TileKey, point: Point) -> TileKey {
         let (mut t, mut tile) = key_tile!(self, start);
 
@@ -73,7 +72,6 @@ impl Plane {
     pub fn find_tile_at(&self, point: Point) -> TileKey {
         self.find_tile_from(self.hint, point)
     }
-
 }
 
 #[cfg(test)]
