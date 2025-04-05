@@ -1,9 +1,0 @@
-[submodule "thirdparty/GSL"]
-	path = thirdparty/GSL
-	url = https://github.com/microsoft/GSL.git
-[submodule "thirdparty/moneta"]
-	path = thirdparty/moneta
-	url = https://github.com/c0rp3n/moneta.git
-[submodule "thirdparty/ut"]
-	path = thirdparty/ut
-	url = https://github.com/boost-ext/ut.git
