@@ -80,6 +80,22 @@ impl Tile {
     pub fn max_y(&self) -> i32 {
         self.bounds.max().y
     }
+
+    pub fn left(&self) -> Stitch {
+        self.stitches.left
+    }
+
+    pub fn below(&self) -> Stitch {
+        self.stitches.below
+    }
+
+    pub fn right(&self) -> Stitch {
+        self.stitches.right
+    }
+
+    pub fn above(&self) -> Stitch {
+        self.stitches.above
+    }
 }
 
 #[test]
@@ -104,79 +120,9 @@ macro_rules! tile {
 }
 
 #[macro_export]
-macro_rules! bounds {
-    ($plane:ident, $tile_key:ident) => {
-        tile!($plane, $tile_key).bounds
-    };
-}
-
-#[macro_export]
-macro_rules! min_x {
-    ($plane:ident, $tile_key:ident) => {
-        bounds!($plane, $tile_key).min().x
-    };
-}
-
-#[macro_export]
-macro_rules! min_y {
-    ($plane:ident, $tile_key:ident) => {
-        bounds!($plane, $tile_key).min().y
-    };
-}
-
-#[macro_export]
-macro_rules! max_x {
-    ($plane:ident, $tile_key:ident) => {
-        bounds!($plane, $tile_key).max().x
-    };
-}
-
-#[macro_export]
-macro_rules! max_y {
-    ($plane:ident, $tile_key:ident) => {
-        bounds!($plane, $tile_key).max().y
-    };
-}
-
-#[macro_export]
-macro_rules! body {
-    ($plane:ident, $tile_key:ident) => {
-        tile!($plane, $tile_key).body
-    };
-}
-
-#[macro_export]
-macro_rules! stitches {
-    ($plane:ident, $tile_key:ident) => {
-        tile!($plane, $tile_key).stitches
-    };
-}
-
-#[macro_export]
-macro_rules! left {
-    ($plane:ident, $tile_key:ident) => {
-        stitches!($plane, $tile_key).left
-    };
-}
-
-#[macro_export]
-macro_rules! below {
-    ($plane:ident, $tile_key:ident) => {
-        stitches!($plane, $tile_key).below
-    };
-}
-
-#[macro_export]
-macro_rules! right {
-    ($plane:ident, $tile_key:ident) => {
-        stitches!($plane, $tile_key).right
-    };
-}
-
-#[macro_export]
-macro_rules! above {
-    ($plane:ident, $tile_key:ident) => {
-        stitches!($plane, $tile_key).above
+macro_rules! key_tile {
+    ($plane:expr, $tile_key:expr) => {
+        ($plane).get_with_key(($tile_key)).unwrap()
     };
 }
 
@@ -239,41 +185,52 @@ impl Plane {
         self.arena.remove(tile).expect("tile was already removed");
     }
 
+    pub fn get(&self, key: TileKey) -> Option<&Tile> {
+        self.slots().get(key)
+    }
+
+    pub fn get_with_key(&self, key: TileKey) -> Option<(TileKey, &Tile)> {
+        match self.get(key) {
+            Some(t) => Some((key, t)),
+            None => None
+        }
+    }
+
     pub fn find_tile_from(&self, start: TileKey, point: Point) -> TileKey {
-        let mut t = start;
+        let (mut t, mut tile) = key_tile!(self, start);
 
         // 1. First move up (or down) along the left edges of tiles until a tile
         //    is found whose vertical range contains the desired point.
-        if point.y() < min_y!(self, t) {
+        if point.y() < tile.min_y() {
             loop {
-                t = below!(self, t).unwrap();
-                if point.y() >= min_y!(self, t) {
+                (t, tile) = key_tile!(self, tile.below().unwrap());
+                if point.y() >= tile.min_y() {
                     break;
                 }
             }
         } else {
-            while point.y() >= max_y!(self, t) {
-                t = above!(self, t).unwrap();
+            while point.y() >= tile.max_y() {
+                (t, tile) = key_tile!(self, tile.above().unwrap());
             }
         }
 
         // 2. Then move left (or right) along the bottom edges of tiles until a
         //    tile is found whose horizontal range contains the desired point.
-        if point.x() < min_x!(self, t) {
+        if point.x() < tile.min_x() {
             loop {
-                while point.x() < min_x!(self, t) {
-                    t = left!(self, t).unwrap();
+                while point.x() < tile.min_x() {
+                    (t, tile) = key_tile!(self, tile.left().unwrap());
                 }
 
-                if point.y() < max_y!(self, t) {
+                if point.y() < tile.max_y() {
                     break;
                 }
 
-                while point.y() < max_y!(self, t) {
-                    t = above!(self, t).unwrap();
+                while point.y() < tile.max_y() {
+                    (t, tile) = key_tile!(self, tile.above().unwrap());
                 }
 
-                if point.x() >= min_x!(self, t) {
+                if point.x() >= tile.min_x() {
                     break;
                 }
             }
@@ -282,21 +239,21 @@ impl Plane {
             //    misalignment, steps 1 and 2 may have to be iterated several times
             //    to locate the tile containing the point.
         } else {
-            while point.x() >= max_x!(self, t) {
+            while point.x() >= tile.max_x() {
                 loop {
-                    t = right!(self, t).unwrap();
-                    if point.x() < max_x!(self, t) {
+                    (t, tile) = key_tile!(self, tile.right().unwrap());
+                    if point.x() < tile.max_x() {
                         break;
                     }
                 }
 
-                if point.y() >= min_y!(self, t) {
+                if point.y() >= tile.min_y() {
                     break;
                 }
 
                 loop {
-                    t = below!(self, t).unwrap();
-                    if point.y() >= min_y!(self, t) {
+                    (t, tile) = key_tile!(self, tile.below().unwrap());
+                    if point.y() >= tile.min_y() {
                         break;
                     }
                 }
