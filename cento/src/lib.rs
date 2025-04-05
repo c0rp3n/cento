@@ -2,6 +2,9 @@ mod explore;
 mod find;
 mod tile;
 
+#[cfg(test)]
+mod tests;
+
 use geo::coord;
 use slotmap::{new_key_type, SlotMap};
 
