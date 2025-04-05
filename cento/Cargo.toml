@@ -1,0 +1,8 @@
+[package]
+name = "cento"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+geo = "0.30.0"
+typed-arena = "2.0.2"

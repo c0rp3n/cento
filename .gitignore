@@ -35,3 +35,8 @@
 *.app
 
 .vscode/
+
+
+# Added by cargo
+
+/target

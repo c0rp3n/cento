@@ -1,0 +1,8 @@
+[package]
+name = "acus"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+steel-core = { git="https://github.com/mattwparas/steel.git", branch = "master" }
+steel-repl = { git="https://github.com/mattwparas/steel.git", branch = "master" }
