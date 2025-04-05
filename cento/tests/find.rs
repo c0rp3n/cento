@@ -29,28 +29,24 @@ fn axis() {
     //         :
     //
 
-    let tiles = vec!(
-        Tile::new(Rect::new(
-            coord! { x: i32::MIN, y: 0},
-            coord! { x: 0, y: i32::MAX},
+    let tiles = vec![
+        Tile::new(
+            Rect::new(coord! { x: i32::MIN, y: 0}, coord! { x: 0, y: i32::MAX}),
+            None,
         ),
-        None),
-        Tile::new(Rect::new(
-            coord! { x: 0, y: 0},
-            coord! { x: i32::MAX, y: i32::MAX},
+        Tile::new(
+            Rect::new(coord! { x: 0, y: 0}, coord! { x: i32::MAX, y: i32::MAX}),
+            None,
         ),
-        None),
-        Tile::new(Rect::new(
-            coord! { x: i32::MIN, y: i32::MIN},
-            coord! { x: 0, y: 0},
+        Tile::new(
+            Rect::new(coord! { x: i32::MIN, y: i32::MIN}, coord! { x: 0, y: 0}),
+            None,
         ),
-        None),
-        Tile::new(Rect::new(
-            coord! { x: 0, y: i32::MIN},
-            coord! { x: i32::MAX, y: 0},
+        Tile::new(
+            Rect::new(coord! { x: 0, y: i32::MIN}, coord! { x: i32::MAX, y: 0}),
+            None,
         ),
-        None),
-    );
+    ];
 
     let (mut plane, keys) = unsafe { Plane::from_unchecked(tiles) };
     assert_eq!(keys.len(), 4);
@@ -64,17 +60,17 @@ fn axis() {
     right_mut!(plane, tl) = Some(tr);
 
     below_mut!(plane, tr) = Some(br);
-    left_mut!(plane, tr)  = Some(tl);
+    left_mut!(plane, tr) = Some(tl);
 
     above_mut!(plane, bl) = Some(tl);
     right_mut!(plane, bl) = Some(br);
 
     above_mut!(plane, br) = Some(tr);
-    left_mut!(plane, br)  = Some(bl);
+    left_mut!(plane, br) = Some(bl);
 
     assert_eq!(plane.find_tile_at(Point::new(0, 0)), tr);
-    assert_eq!(plane.find_tile_at(Point::new(-256,256)), tl);
-    assert_eq!(plane.find_tile_at(Point::new(256,256)), tr);
-    assert_eq!(plane.find_tile_at(Point::new(-256,-256)), bl);
-    assert_eq!(plane.find_tile_at(Point::new(256,-256)), br);
+    assert_eq!(plane.find_tile_at(Point::new(-256, 256)), tl);
+    assert_eq!(plane.find_tile_at(Point::new(256, 256)), tr);
+    assert_eq!(plane.find_tile_at(Point::new(-256, -256)), bl);
+    assert_eq!(plane.find_tile_at(Point::new(256, -256)), br);
 }
