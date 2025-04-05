@@ -1,3 +1,6 @@
+mod find;
+use find::*;
+
 use geo::coord;
 use slotmap::{new_key_type, SlotMap};
 
@@ -194,77 +197,6 @@ impl Plane {
             Some(t) => Some((key, t)),
             None => None
         }
-    }
-
-    pub fn find_tile_from(&self, start: TileKey, point: Point) -> TileKey {
-        let (mut t, mut tile) = key_tile!(self, start);
-
-        // 1. First move up (or down) along the left edges of tiles until a tile
-        //    is found whose vertical range contains the desired point.
-        if point.y() < tile.min_y() {
-            loop {
-                (t, tile) = key_tile!(self, tile.below().unwrap());
-                if point.y() >= tile.min_y() {
-                    break;
-                }
-            }
-        } else {
-            while point.y() >= tile.max_y() {
-                (t, tile) = key_tile!(self, tile.above().unwrap());
-            }
-        }
-
-        // 2. Then move left (or right) along the bottom edges of tiles until a
-        //    tile is found whose horizontal range contains the desired point.
-        if point.x() < tile.min_x() {
-            loop {
-                while point.x() < tile.min_x() {
-                    (t, tile) = key_tile!(self, tile.left().unwrap());
-                }
-
-                if point.y() < tile.max_y() {
-                    break;
-                }
-
-                while point.y() < tile.max_y() {
-                    (t, tile) = key_tile!(self, tile.above().unwrap());
-                }
-
-                if point.x() >= tile.min_x() {
-                    break;
-                }
-            }
-
-            // 3. Since the horizontal motion may have caused a vertical
-            //    misalignment, steps 1 and 2 may have to be iterated several times
-            //    to locate the tile containing the point.
-        } else {
-            while point.x() >= tile.max_x() {
-                loop {
-                    (t, tile) = key_tile!(self, tile.right().unwrap());
-                    if point.x() < tile.max_x() {
-                        break;
-                    }
-                }
-
-                if point.y() >= tile.min_y() {
-                    break;
-                }
-
-                loop {
-                    (t, tile) = key_tile!(self, tile.below().unwrap());
-                    if point.y() >= tile.min_y() {
-                        break;
-                    }
-                }
-            }
-        }
-
-        t
-    }
-
-    pub fn find_tile_at(&self, point: Point) -> TileKey {
-        self.find_tile_from(self.hint, point)
     }
 
     pub fn empty(&self, area: Rect) -> bool {
