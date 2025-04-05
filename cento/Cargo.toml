@@ -5,4 +5,4 @@ edition = "2021"
 
 [dependencies]
 geo = "0.30.0"
-typed-arena = "2.0.2"
+slotmap = "1.0.7"

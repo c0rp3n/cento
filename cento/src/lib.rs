@@ -1,15 +1,16 @@
 use geo::coord;
-use typed_arena::Arena;
+use slotmap::{new_key_type, SlotMap};
 
 use core::num::NonZeroU64;
-use std::ptr::NonNull;
 
 pub type Point = geo::Point<i32>;
 pub type Rect = geo::Rect<i32>;
 
 pub type Body = Option<NonZeroU64>;
 
-pub type Stitch = Option<NonNull<Tile>>;
+new_key_type! { pub struct TileKey; }
+
+pub type Stitch = Option<TileKey>;
 
 pub struct Stitches {
     pub below: Stitch,
@@ -55,15 +56,31 @@ impl Tile {
     }
 }
 
+#[test]
+fn tile_size() {
+    let size = std::mem::size_of::<Tile>();
+    let align = std::mem::align_of::<Tile>();
+    assert!(size <= 64);
+    assert_eq!(align, 8);
+}
+
 pub struct Plane {
-    arena: Arena<Tile>,
-    hint: NonNull<Tile>,
+    arena: SlotMap<TileKey, Tile>,
+    hint: TileKey,
 }
 
 impl Plane {
     pub fn new() -> Plane {
-        let a = Arena::new();
-        let h = NonNull::from(a.alloc(Tile::universe()));
+        let mut a: SlotMap<TileKey, Tile> = SlotMap::with_key();
+        let h = a.insert(Tile::universe());
         Self { arena: a, hint: h }
+    }
+
+    fn alloc(&mut self, r: Rect, body: Body) -> TileKey {
+        self.arena.insert(Tile::new(r, body))
+    }
+
+    fn free(&mut self, tile: TileKey) {
+        self.arena.remove(tile).expect("tile was already removed");
     }
 }
