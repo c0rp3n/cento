@@ -151,7 +151,6 @@ fn build_axis() {
 
     for (key, e) in zip(keys.iter(), expected.iter()) {
         let a = plane.slots()[*key].stitches;
-        println!("{:?} {:?}", key, a);
         assert_eq!(a, *e);
     }
 }
