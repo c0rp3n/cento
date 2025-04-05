@@ -194,34 +194,6 @@ macro_rules! stitches_mut {
     };
 }
 
-#[macro_export]
-macro_rules! left_mut {
-    ($plane:ident, $tile_key:ident) => {
-        stitches_mut!($plane, $tile_key).left
-    };
-}
-
-#[macro_export]
-macro_rules! below_mut {
-    ($plane:ident, $tile_key:ident) => {
-        stitches_mut!($plane, $tile_key).below
-    };
-}
-
-#[macro_export]
-macro_rules! right_mut {
-    ($plane:ident, $tile_key:ident) => {
-        stitches_mut!($plane, $tile_key).right
-    };
-}
-
-#[macro_export]
-macro_rules! above_mut {
-    ($plane:ident, $tile_key:ident) => {
-        stitches_mut!($plane, $tile_key).above
-    };
-}
-
 impl Plane {
     pub fn new() -> Plane {
         let mut a: SlotMap<TileKey, Tile> = SlotMap::with_key();

@@ -56,17 +56,33 @@ fn axis() {
     let bl = keys[2];
     let br = keys[3];
 
-    below_mut!(plane, tl) = Some(bl);
-    right_mut!(plane, tl) = Some(tr);
+    stitches_mut!(plane, tl) = Stitches {
+        left: None,
+        below: Some(bl),
+        right: Some(tr),
+        above: None,
+    };
 
-    below_mut!(plane, tr) = Some(br);
-    left_mut!(plane, tr) = Some(tl);
+    stitches_mut!(plane, tr) = Stitches {
+        left: Some(tl),
+        below: Some(br),
+        right: None,
+        above: None,
+    };
 
-    above_mut!(plane, bl) = Some(tl);
-    right_mut!(plane, bl) = Some(br);
+    stitches_mut!(plane, bl) = Stitches {
+        left: None,
+        below: None,
+        right: Some(br),
+        above: Some(tl),
+    };
 
-    above_mut!(plane, br) = Some(tr);
-    left_mut!(plane, br) = Some(bl);
+    stitches_mut!(plane, br) = Stitches {
+        left: Some(bl),
+        below: None,
+        right: None,
+        above: Some(tr),
+    };
 
     assert_eq!(plane.find_tile_at(Point::new(0, 0)), tr);
     assert_eq!(plane.find_tile_at(Point::new(-256, 256)), tl);
