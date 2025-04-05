@@ -35,7 +35,6 @@ fn is_above(a: &Rect, b: &Rect) -> bool {
 
 macro_rules! update_stitch {
     ($sm:ident, $from:ident, $stitch:ident, $to:ident) => {
-
         match $from.stitches.$stitch {
             Some(o) => {
                 let old: Rect = $sm[o].bounds;
@@ -43,12 +42,10 @@ macro_rules! update_stitch {
                 if new.min().x_y() < old.min().x_y() {
                     $from.stitches.$stitch = Some($to.clone())
                 }
-            },
-            None => {
-                $from.stitches.$stitch = Some($to.clone())
             }
+            None => $from.stitches.$stitch = Some($to.clone()),
         }
-    }
+    };
 }
 
 fn build_stitches(plane: &mut Plane, key: TileKey, keys: &Vec<TileKey>) {
@@ -90,7 +87,7 @@ mod fixtures {
     use std::num::NonZero;
 
     pub fn axis() -> Vec<Tile> {
-        vec!(
+        vec![
             Tile::new(
                 Rect::new(coord! { x: i32::MIN, y: 0}, coord! { x: 0, y: i32::MAX}),
                 Some(NonZero::new(1).unwrap()),
@@ -107,9 +104,8 @@ mod fixtures {
                 Rect::new(coord! { x: 0, y: i32::MIN}, coord! { x: i32::MAX, y: 0}),
                 Some(NonZero::new(4).unwrap()),
             ),
-        )
+        ]
     }
-
 }
 
 #[test]

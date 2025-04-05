@@ -1,5 +1,5 @@
-mod find;
 mod explore;
+mod find;
 mod tile;
 
 use geo::coord;
@@ -128,7 +128,7 @@ impl Plane {
     pub fn get_with_key(&self, key: TileKey) -> Option<(TileKey, &Tile)> {
         match self.get(key) {
             Some(t) => Some((key, t)),
-            None => None
+            None => None,
         }
     }
 }

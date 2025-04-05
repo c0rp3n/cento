@@ -1,4 +1,3 @@
-
 use crate::*;
 
 impl Plane {
@@ -54,7 +53,7 @@ mod tests {
 
     mod empty {
         use super::*;
-    
+
         #[test]
         fn universe() {
             let plane = Plane::new();
@@ -63,6 +62,5 @@ mod tests {
                 coord! {x: 512, y:512}
             )));
         }
-    
     }
 }
