@@ -1,8 +1,21 @@
 use cento::*;
-use geo::{coord, Contains, Intersects};
+use geo::{coord, Intersects};
 
 use std::iter::zip;
-use std::num::NonZero;
+
+#[test]
+fn intersects() {
+    {
+        let r = Rect::new(coord! { x: i32::MIN, y: i32::MIN}, coord! { x: 0, y: 0});
+        let p = coord! { x: 0, y: 0};
+        assert!(r.intersects(&p));
+    }
+    {
+        let r = Rect::new(coord! { x: i32::MIN, y: 0}, coord! { x: 0, y: i32::MAX});
+        let p = coord! { x: 0, y: 0};
+        assert!(r.intersects(&p));
+    }
+}
 
 fn is_left(a: &Rect, b: &Rect) -> bool {
     (a.min().x == b.max().x) && b.intersects(&a.min())
@@ -69,39 +82,39 @@ pub fn create_tiles(tiles: Vec<Tile>) -> (Plane, Vec<TileKey>) {
     (plane, keys)
 }
 
+mod fixtures {
+
+    use cento::*;
+    use geo::coord;
+
+    use std::num::NonZero;
+
+    pub fn axis() -> Vec<Tile> {
+        vec!(
+            Tile::new(
+                Rect::new(coord! { x: i32::MIN, y: 0}, coord! { x: 0, y: i32::MAX}),
+                Some(NonZero::new(1).unwrap()),
+            ),
+            Tile::new(
+                Rect::new(coord! { x: 0, y: 0}, coord! { x: i32::MAX, y: i32::MAX}),
+                Some(NonZero::new(2).unwrap()),
+            ),
+            Tile::new(
+                Rect::new(coord! { x: i32::MIN, y: i32::MIN}, coord! { x: 0, y: 0}),
+                Some(NonZero::new(3).unwrap()),
+            ),
+            Tile::new(
+                Rect::new(coord! { x: 0, y: i32::MIN}, coord! { x: i32::MAX, y: 0}),
+                Some(NonZero::new(4).unwrap()),
+            ),
+        )
+    }
+
+}
+
 #[test]
 fn build_axis() {
-    let tiles = vec![
-        Tile::new(
-            Rect::new(coord! { x: i32::MIN, y: 0}, coord! { x: 0, y: i32::MAX}),
-            Some(NonZero::new(1).unwrap()),
-        ),
-        Tile::new(
-            Rect::new(coord! { x: 0, y: 0}, coord! { x: i32::MAX, y: i32::MAX}),
-            Some(NonZero::new(2).unwrap()),
-        ),
-        Tile::new(
-            Rect::new(coord! { x: i32::MIN, y: i32::MIN}, coord! { x: 0, y: 0}),
-            Some(NonZero::new(3).unwrap()),
-        ),
-        Tile::new(
-            Rect::new(coord! { x: 0, y: i32::MIN}, coord! { x: i32::MAX, y: 0}),
-            Some(NonZero::new(4).unwrap()),
-        ),
-    ];
-
-    {
-        let r = Rect::new(coord! { x: i32::MIN, y: i32::MIN}, coord! { x: 0, y: 0});
-        let p = coord! { x: 0, y: 0};
-        assert!(r.intersects(&p));
-    }
-    {
-        let r = Rect::new(coord! { x: i32::MIN, y: 0}, coord! { x: 0, y: i32::MAX});
-        let p = coord! { x: 0, y: 0};
-        assert!(r.intersects(&p));
-    }
-
-    let (plane, keys) = create_tiles(tiles);
+    let (plane, keys) = create_tiles(fixtures::axis());
     assert_eq!(keys.len(), 4);
 
     let tl = keys[0];
