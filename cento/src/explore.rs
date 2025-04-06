@@ -1,5 +1,7 @@
 use crate::*;
 
+use geo::coord;
+
 impl Plane {
     pub fn empty(&self, area: Rect) -> bool {
         // 1. Use the point finding algorithm to locate the tile containing the
@@ -44,6 +46,107 @@ impl Plane {
 
         return true;
     }
+
+    fn enumerate_right(
+        &self,
+        enum_key: TileKey,
+        enum_bottom: i32,
+        area: &Rect,
+        callback: &mut impl FnMut(TileKey) -> bool,
+    ) -> bool {
+        let at_bottom = enum_bottom <= area.min().y;
+
+        // Begin examination of tiles along right edge.
+        // A tile to the right of the one being enumerated is enumerable if:
+        //  - its bottom lies at or above that of the tile being enumerated, or,
+        //  - the bottom of the tile being enumerated lies at or below the
+        //    bottom of the search rectangle.
+
+        let search_bottom = if enum_bottom < area.min().y {
+            area.min().y
+        } else {
+            enum_bottom
+        };
+
+        // We keep a copy of the tiles being enumerated incase they get freed by
+        // the callback function.
+        let (mut t, mut tile) = key_tile!(self, enum_key);
+        let mut next_top = tile.max_y();
+
+        while next_top > search_bottom {
+            // Since the client's filter function may result in this tile
+            // being deallocated or otherwise modified, we must extract
+            // all the information we will need from the tile before we
+            // apply the filter function.
+
+            let (b, below) = key_tile!(self, tile.below().unwrap());
+            next_top = below.max_y();
+
+            if (tile.min_y() < area.max().y) && (at_bottom || (tile.min_y() >= enum_bottom)) {
+                if callback(t) {
+                    return true;
+                }
+
+                if tile.max_x() < area.max().x {
+                    if self.enumerate_right(tile.right().unwrap(), tile.min_y(), area, callback) {
+                        return true;
+                    }
+                }
+            }
+
+            (t, tile) = (b, below);
+        }
+
+        false
+    }
+
+    pub fn query(&self, area: &Rect, callback: &mut impl FnMut(TileKey) -> bool) {
+        let mut here = Point::new(area.min().x, area.max().y - 1);
+        let mut key = self.find_tile_at(here);
+
+        let mut here_y = here.y() as i64;
+        while here_y >= area.min().y as i64 {
+            let tile: Tile = tile!(self, key);
+
+            // Find the tile (tp) immediately below the one to be
+            // enumerated (enumTile).  This must be done before we enumerate
+            // the tile, as the filter function applied to enumerate
+            // it can result in its deallocation or modification in
+            // some other way.
+            //
+            // We also have to be sure we do not overflow from the infinity tile
+
+            here_y = tile.min_y() as i64 - 1;
+            match i32::try_from(here_y) {
+                Ok(y) => here.set_y(y),
+                _ => here.set_y(i32::MIN),
+            };
+            let next: TileKey = self.find_tile_at(here);
+
+            if callback(key) {
+                return;
+            }
+
+            // If the right boundary of the tile being enumerated is
+            // inside of the search area, recursively enumerate
+            // tiles to its right.
+
+            if tile.max_x() < area.max().x {
+                if self.enumerate_right(tile.right().unwrap(), tile.min_y(), area, callback) {
+                    return;
+                }
+            }
+            key = next;
+        }
+    }
+
+    pub fn query_all(&self, callback: &mut impl FnMut(TileKey) -> bool) {
+        let area = Rect::new(
+            coord! { x: i32::MIN, y: i32::MIN },
+            coord! { x: i32::MAX, y: i32::MAX },
+        );
+        self.query(&area, callback)
+    }
 }
 
 #[cfg(test)]
@@ -61,6 +164,22 @@ mod tests {
                 coord! { x: -512, y: -512},
                 coord! {x: 512, y:512}
             )));
+        }
+    }
+
+    mod query_all {
+        use super::*;
+
+        #[test]
+        fn universe() {
+            let plane = Plane::new();
+
+            let mut c = 0;
+            let mut callback = |_t| { c += 1; false };
+
+            plane.query_all(&mut callback);
+
+            assert_eq!(c, 1);
         }
     }
 }

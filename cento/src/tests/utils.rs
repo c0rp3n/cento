@@ -1,5 +1,5 @@
-use crate::*;
 use crate::tests::fixtures;
+use crate::*;
 
 use geo::{coord, Intersects};
 
