@@ -1,5 +1,6 @@
 mod explore;
 mod find;
+mod split;
 mod tile;
 
 #[cfg(test)]
