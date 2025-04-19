@@ -175,7 +175,10 @@ mod tests {
             let plane = Plane::new();
 
             let mut c = 0;
-            let mut callback = |_t| { c += 1; false };
+            let mut callback = |_t| {
+                c += 1;
+                false
+            };
 
             plane.query_all(&mut callback);
 
