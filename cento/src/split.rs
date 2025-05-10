@@ -182,4 +182,21 @@ impl Plane {
             right: rkey,
         })
     }
+
+    pub fn split(&mut self, key: TileKey, r: Rect) -> TileKey {
+        let mut ret = key;
+        if let Some(split) = self.split_horz(ret, r.max().y) {
+            ret = split.lower;
+        }
+        if let Some(split) = self.split_horz(ret, r.min().y) {
+            ret = split.upper;
+        }
+        if let Some(split) = self.split_vert(ret, r.max().x) {
+            ret = split.left;
+        }
+        if let Some(split) = self.split_vert(ret, r.min().x) {
+            ret = split.right;
+        }
+        ret
+    }
 }
