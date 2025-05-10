@@ -42,8 +42,8 @@ impl Plane {
 
         // adjust corner stitches along top edge
         other_key = lower.above();
-        while other_key.is_some() {
-            let other = unsafe { slots.get_unchecked_mut(other_key?) };
+        while let Some(okey) = other_key {
+            let other = unsafe { slots.get_unchecked_mut(okey) };
             if other.stitches.below != Some(lkey) {
                 break;
             }
@@ -55,8 +55,8 @@ impl Plane {
 
         // adjust corner stitches along right edge
         other_key = lower.right();
-        while other_key.is_some() {
-            let other = unsafe { slots.get_unchecked_mut(other_key?) };
+        while let Some(okey) = other_key {
+            let other = unsafe { slots.get_unchecked_mut(okey) };
             if other.min_y() < y {
                 break;
             }
@@ -68,8 +68,8 @@ impl Plane {
 
         // adjust corner stitches along left edge
         other_key = lower.left();
-        while other_key.is_some() {
-            let other = unsafe { slots.get_unchecked_mut(other_key?) };
+        while let Some(okey) = other_key {
+            let other = unsafe { slots.get_unchecked_mut(okey) };
             if other.max_y() > y {
                 break;
             }
@@ -77,8 +77,8 @@ impl Plane {
         }
 
         upper.stitches.left = other_key;
-        while other_key.is_some() {
-            let other = unsafe { slots.get_unchecked_mut(other_key?) };
+        while let Some(okey) = other_key {
+            let other = unsafe { slots.get_unchecked_mut(okey) };
             if other.right() != Some(lkey) {
                 break;
             }
@@ -128,8 +128,8 @@ impl Plane {
 
         // adjust corner stitches along the right edge
         other_key = left.right();
-        while other_key.is_some() {
-            let other = unsafe { slots.get_unchecked_mut(other_key?) };
+        while let Some(okey) = other_key {
+            let other = unsafe { slots.get_unchecked_mut(okey) };
             if other.stitches.below != Some(lkey) {
                 break;
             }
@@ -141,8 +141,8 @@ impl Plane {
 
         // adjust corner stitches along the top edge
         other_key = left.above();
-        while other_key.is_some() {
-            let other = unsafe { slots.get_unchecked_mut(other_key?) };
+        while let Some(okey) = other_key {
+            let other = unsafe { slots.get_unchecked_mut(okey) };
             if other.min_x() < x {
                 break;
             }
@@ -154,8 +154,8 @@ impl Plane {
 
         // adjust corner stitches along the bottom edge
         other_key = left.below();
-        while other_key.is_some() {
-            let other = unsafe { slots.get_unchecked_mut(other_key?) };
+        while let Some(okey) = other_key {
+            let other = unsafe { slots.get_unchecked_mut(okey) };
             if other.min_x() > x {
                 break;
             }
@@ -163,8 +163,8 @@ impl Plane {
         }
 
         right.stitches.below = other_key;
-        while other_key.is_some() {
-            let other = unsafe { slots.get_unchecked_mut(other_key?) };
+        while let Some(okey) = other_key {
+            let other = unsafe { slots.get_unchecked_mut(okey) };
             if other.above() != Some(lkey) {
                 break;
             }
