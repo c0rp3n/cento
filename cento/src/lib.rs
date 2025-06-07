@@ -1,5 +1,7 @@
 mod explore;
 mod find;
+mod join;
+mod merge;
 mod split;
 mod tile;
 
@@ -115,14 +117,6 @@ impl Plane {
 
     pub fn hint(&self) -> TileKey {
         self.hint
-    }
-
-    pub(crate) fn alloc(&mut self, r: Rect, body: Body) -> TileKey {
-        self.arena.insert(Tile::new(r, body))
-    }
-
-    pub(crate) fn free(&mut self, tile: TileKey) {
-        self.arena.remove(tile).expect("tile was already removed");
     }
 
     pub fn get(&self, key: TileKey) -> Option<&Tile> {
